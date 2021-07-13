@@ -18,8 +18,8 @@ sub info
 '''
 study ='docnet'
 study_dir = f"/lab_data/behrmannlab/vlad/{study}"
-subj_list=["docnet2002", "docnet2007"]
-#subj_list=["docnet2003"]
+subj_list=["docnet2001", "docnet2002","docnet2003","docnet2005", "docnet2007","docnet2008", "docnet2012"]
+#subj_list=["docnet2001", "docnet2003","docnet2005","docnet2008", "docnet2012"]
 
  #runs to pull ROIs from
 rois = ["LO_toolloc", 'PFS_toolloc', 'PPC_spaceloc', 'APC_spaceloc', 'PPC_depthloc', 'PPC_distloc', 'APC_depthloc', 'APC_distloc', 'PPC_toolloc', 'APC_toolloc',]
@@ -27,7 +27,7 @@ rois = ["LO_toolloc", 'PFS_toolloc', 'PPC_spaceloc', 'APC_spaceloc', 'PPC_depthl
 
 exp = 'catmvpa' #experimental tasks
 #exp_suf = ["_12", '_34', '_13', '_24', '_14', '_23']
-exp_suf = ["_odd", "_even",""]
+exp_suf = ["", "_odd", "_even",""]
 
 exp_cond = [ 'boat_1', 'boat_2', 'boat_3', 'boat_4', 'boat_5',
 'camera_1', 'camera_2', 'camera_3', 'camera_4', 'camera_5',
@@ -36,7 +36,7 @@ exp_cond = [ 'boat_1', 'boat_2', 'boat_3', 'boat_4', 'boat_5',
 'lamp_1', 'lamp_2', 'lamp_3', 'lamp_4', 'lamp_5']
 exp_cats = ['boat', 'camera',' car', 'guitar','lamp']
 exp_cope=list(range(1,26))#copes for localizer runs; corresponding numerically t
-suf="_split"
+suf="_combined"
 
 
 def extract_acts():
@@ -100,7 +100,7 @@ def calc_within_between():
     '''
 
     #run_pairs = [["_12",'_13', '_14'],['_34','_24', '_23' ]]
-    run_pairs = [['_odd'],['_even']]
+    run_pairs = [[''],['']]
     
     
     num_vox = 1000
@@ -286,7 +286,7 @@ def calc_summary_mvpa():
     summary_dir = f'{study_dir}/derivatives/results/{exp}'
     os.makedirs(summary_dir, exist_ok = True)
     os.makedirs(f'{summary_dir}/figures', exist_ok = True)
-    suf = '_split'
+    #suf = '_split'
     for lr in ['l','r']: #set left and right    
         for rr in rois:
             roi_vals = []
@@ -316,10 +316,10 @@ def calc_summary_mvpa():
 
 
 
-extract_acts()
-sort_by_functional()
+#extract_acts()
+#sort_by_functional()
 calc_within_between()
-#calc_summary()
+
 calc_summary_mvpa()
 
 
