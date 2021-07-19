@@ -26,14 +26,12 @@ import pdb
 
 
 stim_folder = "/home/vayzenbe/GitHub_Repos/docnet/stim/original"
-out_folder = "/home/vayzenbe/GitHub_Repos/LiMA/stim/"
+out_folder = "/home/vayzenbe/GitHub_Repos/docnet/stim/"
 
 #stim_folder = "C:/Users/vayze/Desktop/GitHub_Repos/LiMA/Frames"
 #out_folder = "C:/Users/vayze/Desktop/GitHub_Repos/LiMA/Frames"
 skel = ['23', '26', '31', '31_0', '31_50']
 SF = ['Skel','Bulge']
-skel = ['23']
-
 
 
             # In[73]:
@@ -112,18 +110,23 @@ def compute_aof(distImage ,IDX,sphere_points,epsilon):
 
 
 
-imfiles = glob.globg(f'{stim_folder}/*.jpg')
+imfiles = glob.glob(f'{stim_folder}/*.jpg')
 os.makedirs(f'{out_folder}/binary/', exist_ok = True)
 os.makedirs(f'{out_folder}/blur/', exist_ok = True)
 os.makedirs(f'{out_folder}/coords/', exist_ok = True)
+
+
 #jit(nopython=True)
 for imf in imfiles:
 
     #inframe = f'{stim_folder}/Figure_{sk}_{sf}/Figure_{sk}_{sf}_{ff}.jpg'
     #figure= f'Figure_{sk}_{sf}/Figure_{sk}_{sf}_{ff}'
+    curr_file = imf.replace(stim_folder+ '/', '')
+    curr_file = curr_file[:-4]
     
-    print(imfiles)
-    im = io.imread(imfiles)
+    
+    print(curr_file)
+    im = io.imread(imf)
     
 
     im = rgb2gray(im)
@@ -188,14 +191,15 @@ for imf in imfiles:
     skeletonImage[skeletonImage < flux_threshold] = 0
     skelim = np.interp(skeletonImage, (skeletonImage.min(), skeletonImage.max()), (0, 255))
     
+    
     #plt.imshow(skelim, cmap="gray")
     #save coords
-    np.savetxt(f'{out_folder}/coords/{figure}.csv', skel,delimiter=',')
+    np.savetxt(f'{out_folder}/coords/{curr_file}.csv', skel,delimiter=',')
     #save binary
     skelim = crop(skelim, 5)
-    io.imsave(f'{out_folder}/binary/{figure}.jpg',skelim)
+    io.imsave(f'{out_folder}/binary/{curr_file}.jpg',skelim)
 
     #save blurred binary
     skelim = gaussian(skelim, sigma=3)
-    io.imsave(f'{out_folder}/blur/{figure}.jpg',skelim)
+    io.imsave(f'{out_folder}/blur/{curr_file}.jpg',skelim)
     #skeletonImage[skeletonImage > flux_threshold] = 1
