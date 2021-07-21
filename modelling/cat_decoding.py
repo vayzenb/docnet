@@ -35,7 +35,7 @@ exp_labels = np.concatenate((np.ones((1,5)),np.ones((1,5))*2, np.ones((1,5))*3, 
 
 data_dir = 'derivatives/results/beta/catmvpa'
 
-n_vox = 100
+n_vox = 200
 
 #iteratively combine LO and PFS with one of the dorsal ROIS (or on its own)
 
@@ -102,7 +102,7 @@ for sn, ss in enumerate(subj_list):
                 #run SVM
                 X = roi_data
                 y = exp_labels
-                sss = StratifiedShuffleSplit(n_splits=5, test_size=0.2)
+                sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2)
                 sss.get_n_splits(X, y)
                 
                 roi_acc = []
