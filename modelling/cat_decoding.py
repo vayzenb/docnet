@@ -35,7 +35,7 @@ exp_labels = np.concatenate((np.ones((1,5)),np.ones((1,5))*2, np.ones((1,5))*3, 
 
 data_dir = 'derivatives/results/beta/catmvpa'
 
-n_vox = 200
+n_vox = 100
 
 #iteratively combine LO and PFS with one of the dorsal ROIS (or on its own)
 

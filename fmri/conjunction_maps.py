@@ -44,20 +44,40 @@ for cc in cond:
     bash_cmd = f'fslmaths {cond_stat}/cluster_mask_zstat1.nii.gz -bin -mul {cond_stat}/stats/zstat1.nii.gz {roi_dir}/thresh/{cc}_thresh.nii.gz'
     subprocess.run(bash_cmd.split(), check=True)
     '''
+
+    '''
+    This version creates binary conjuction maps
+    '''
+    #Make binary cluster-corrected mask
+    #add 1 to space mask so it can seperate from the other
+    bash_cmd = f'fslmaths {space_stat}/cluster_mask_zstat1.nii.gz -bin {roi_dir}/conjunction/spaceloc_sep.nii.gz'
+    subprocess.run(bash_cmd.split(), check=True)
+
+    #make other condition cluster mask binary
+    #leave it as 1 so it's in a diff range
+    bash_cmd = f'fslmaths {cond_stat}/cluster_mask_zstat1.nii.gz -bin {roi_dir}/conjunction/{cc}_sep.nii.gz'
+    subprocess.run(bash_cmd.split(), check=True)
+
+    #make conjunction by adding cluster masks
+    bash_cmd = f'fslmaths {roi_dir}/conjunction/spaceloc_sep.nii.gz -add {roi_dir}/conjunction/{cc}_sep.nii.gz -thr 1.5 {roi_dir}/conjunction/spaceloc_{cc}_conj_bin.nii.gz'
+    subprocess.run(bash_cmd.split(), check=True)
+
+    '''
+    THis version makes continous conjuction maps
+    '''
+    #make the whole z-map into a proportion and then mul by the cluster images
+    
     #make denominmator for final image
-    bash_cmd = f'fslmaths {space_stat}/stats/zstat1.nii.gz -add {cond_stat}/stats/zstat1.nii.gz {roi_dir}/conjunction/spaceloc_{cc}_conj.nii.gz'
+    bash_cmd = f'fslmaths {space_stat}/stats/zstat1.nii.gz -add {cond_stat}/stats/zstat1.nii.gz {roi_dir}/conjunction/spaceloc_{cc}_denom.nii.gz'
     subprocess.run(bash_cmd.split(), check=True)
 
-    #make proportion
-    bash_cmd = f'fslmaths {roi_dir}/thresh/spaceloc_thresh.nii.gz -div {roi_dir}/conjunction/spaceloc_{cc}_conj.nii.gz {roi_dir}/conjunction/spaceloc_{cc}_conj.nii.gz'
+    #make spaceloc proportion
+    bash_cmd = f'fslmaths {space_stat}/stats/zstat1.nii.gz -div {roi_dir}/conjunction/spaceloc_{cc}_denom.nii.gz -mul {roi_dir}/conjunction/spaceloc_sep.nii.gz {roi_dir}/conjunction/spaceloc_{cc}_conj_cont.nii.gz'
     subprocess.run(bash_cmd.split(), check=True)
 
-    #Try threshing by mask
-    bash_cmd = f'fslmaths {space_stat}/cluster_mask_zstat1.nii.gz -add {cond_stat}/cluster_mask_zstat1.nii.gz -bin -mul \
-        {roi_dir}/conjunction/spaceloc_{cc}_conj.nii.gz {roi_dir}/conjunction/spaceloc_{cc}_conj.nii.gz'
+    #make proportion for other cond
+    bash_cmd = f'fslmaths {cond_stat}/stats/zstat1.nii.gz -div {roi_dir}/conjunction/spaceloc_{cc}_denom.nii.gz -mul {roi_dir}/conjunction/{cc}_sep.nii.gz {roi_dir}/conjunction/{cc}_spaceloc_conj_cont.nii.gz'
     subprocess.run(bash_cmd.split(), check=True)
-
-
 
 
 
