@@ -20,6 +20,7 @@ from PIL import Image
 import scipy.ndimage.morphology as morphOps
 from skimage.filters import  gaussian
 from skimage.util import crop
+from skimage.util import pad
 import os
 import glob as glob
 import pdb
@@ -28,8 +29,8 @@ import pdb
 stim_folder = "/home/vayzenbe/GitHub_Repos/docnet/stim/binary"
 out_folder = "/home/vayzenbe/GitHub_Repos/docnet/stim/"
 
-#stim_folder = "C:/Users/vayze/Desktop/GitHub_Repos/LiMA/Frames"
-#out_folder = "C:/Users/vayze/Desktop/GitHub_Repos/LiMA/Frames"
+stim_folder = "C:/Users/vayze/Desktop/GitHub_Repos/docnet/stim/binary"
+out_folder = "C:/Users/vayze/Desktop/GitHub_Repos/docnet/stim"
 skel = ['23', '26', '31', '31_0', '31_50']
 SF = ['Skel','Bulge']
 
@@ -121,7 +122,7 @@ for imf in imfiles:
 
     #inframe = f'{stim_folder}/Figure_{sk}_{sf}/Figure_{sk}_{sf}_{ff}.jpg'
     #figure= f'Figure_{sk}_{sf}/Figure_{sk}_{sf}_{ff}'
-    curr_file = imf.replace(stim_folder+ '/', '')
+    curr_file = imf.replace(stim_folder + '/', '')
     curr_file = curr_file[:-4]
     
     
@@ -130,6 +131,7 @@ for imf in imfiles:
     
 
     im = rgb2gray(im)
+    im = pad(im, 10) 
     im = resize(im, [225,225], anti_aliasing=True)
 
     #thresh = threshold_otsu(im)
@@ -143,7 +145,7 @@ for imf in imfiles:
                 dt=0.5, init_level_set='checkerboard', extended_output=True)
     
     
-    silh = img.astype(int)
+    silh = cv[0].astype(int)
     '''
     if np.mean(silh[0:25, 0:25]) > 0:
         cv = chan_vese(filtered_img, mu=0.1, lambda1=.5, lambda2=1, tol=1e-3, max_iter=500,
