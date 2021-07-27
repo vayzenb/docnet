@@ -29,11 +29,12 @@ import pdb
 stim_folder = "/home/vayzenbe/GitHub_Repos/docnet/stim/binary"
 out_folder = "/home/vayzenbe/GitHub_Repos/docnet/stim/"
 
-#stim_folder = "C:/Users/vayze/Desktop/GitHub_Repos/docnet/stim/binary"
-#out_folder = "C:/Users/vayze/Desktop/GitHub_Repos/docnet/stim"
+stim_folder = "C:/Users/vayze/Desktop/GitHub_Repos/docnet/stim/binary"
+out_folder = "C:/Users/vayze/Desktop/GitHub_Repos/docnet/stim"
 skel = ['23', '26', '31', '31_0', '31_50']
 SF = ['Skel','Bulge']
 
+pad_num = 50
 
             # In[73]:
 def sample_sphere_2D(number_of_samples):
@@ -131,8 +132,8 @@ for imf in imfiles:
     
 
     im = rgb2gray(im)
-    im = pad(im, 10) 
-    im = resize(im, [225,225], anti_aliasing=True)
+    im = np.pad(im, pad_num) 
+    im = resize(im, [225 +pad_num,225 +pad_num], anti_aliasing=True)
 
     #thresh = threshold_otsu(im)
     #binary = im > thresh
@@ -192,7 +193,7 @@ for imf in imfiles:
     
     skeletonImage[skeletonImage < flux_threshold] = 0
     skelim = np.interp(skeletonImage, (skeletonImage.min(), skeletonImage.max()), (0, 255))
-    
+    skelim = skelim[pad_num:(skelim.shape[0]-pad_num), pad_num:(skelim.shape[1]-pad_num)]
     
     #plt.imshow(skelim, cmap="gray")
     #save coords
@@ -203,5 +204,6 @@ for imf in imfiles:
 
     #save blurred binary
     skelim = gaussian(skelim, sigma=3)
+    
     io.imsave(f'{out_folder}/blur/{curr_file}.jpg',skelim)
     #skeletonImage[skeletonImage > flux_threshold] = 1
