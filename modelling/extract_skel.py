@@ -25,7 +25,7 @@ import glob as glob
 import pdb
 
 
-stim_folder = "/home/vayzenbe/GitHub_Repos/docnet/stim/original"
+stim_folder = "/home/vayzenbe/GitHub_Repos/docnet/stim/binary"
 out_folder = "/home/vayzenbe/GitHub_Repos/docnet/stim/"
 
 #stim_folder = "C:/Users/vayze/Desktop/GitHub_Repos/LiMA/Frames"
@@ -110,8 +110,8 @@ def compute_aof(distImage ,IDX,sphere_points,epsilon):
 
 
 
-imfiles = glob.glob(f'{stim_folder}/*.jpg')
-os.makedirs(f'{out_folder}/binary/', exist_ok = True)
+imfiles = glob.glob(f'{stim_folder}/*.png')
+#os.makedirs(f'{out_folder}/binary/', exist_ok = True)
 os.makedirs(f'{out_folder}/blur/', exist_ok = True)
 os.makedirs(f'{out_folder}/coords/', exist_ok = True)
 
@@ -137,19 +137,19 @@ for imf in imfiles:
     
     
     img = img_as_float(im)
-    filtered_img = gaussian(img, sigma=3)
+    filtered_img = gaussian(img, sigma=2)
     # Feel free to play around with the parameters to see how they impact the result
-    cv = chan_vese(filtered_img, mu=0.25, lambda1=.5, lambda2=1, tol=1e-3, max_iter=200,
+    cv = chan_vese(img, mu=0.25, lambda1=.5, lambda2=1, tol=1e-3, max_iter=200,
                 dt=0.5, init_level_set='checkerboard', extended_output=True)
     
     
-    silh = cv[0].astype(int)
-    
+    silh = img.astype(int)
+    '''
     if np.mean(silh[0:25, 0:25]) > 0:
         cv = chan_vese(filtered_img, mu=0.1, lambda1=.5, lambda2=1, tol=1e-3, max_iter=500,
         dt=.5, init_level_set='checkerboard', extended_output=True)
         silh = cv[0].astype(int)
-    
+    '''
     
     I = silh
     #print(I.shape)
@@ -197,7 +197,7 @@ for imf in imfiles:
     np.savetxt(f'{out_folder}/coords/{curr_file}.csv', skel,delimiter=',')
     #save binary
     skelim = crop(skelim, 5)
-    io.imsave(f'{out_folder}/binary/{curr_file}.jpg',skelim)
+    #io.imsave(f'{out_folder}/binary/{curr_file}.jpg',skelim)
 
     #save blurred binary
     skelim = gaussian(skelim, sigma=3)
