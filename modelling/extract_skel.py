@@ -29,8 +29,8 @@ import pdb
 stim_folder = "/home/vayzenbe/GitHub_Repos/docnet/stim/binary"
 out_folder = "/home/vayzenbe/GitHub_Repos/docnet/stim/"
 
-stim_folder = "C:/Users/vayze/Desktop/GitHub_Repos/docnet/stim/binary"
-out_folder = "C:/Users/vayze/Desktop/GitHub_Repos/docnet/stim"
+#stim_folder = "C:/Users/vayze/Desktop/GitHub_Repos/docnet/stim/binary"
+#out_folder = "C:/Users/vayze/Desktop/GitHub_Repos/docnet/stim"
 skel = ['23', '26', '31', '31_0', '31_50']
 SF = ['Skel','Bulge']
 
