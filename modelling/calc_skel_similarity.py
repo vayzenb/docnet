@@ -37,7 +37,8 @@ def rotate_skel(skel,deg):
     return skel
 
 
-skelfiles = glob.glob(f'{skel_folder}/*.csv')
+skelfiles = sorted(glob.glob(f'{skel_folder}/*.csv'))
+
 skel_rdm = pd.DataFrame(columns=['obj1', 'obj2', 'similarity'])
 
 for sk1n, sk1 in enumerate(skelfiles):

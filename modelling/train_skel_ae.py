@@ -14,6 +14,7 @@ from LoadFrames import LoadFrames
 from torch.utils.tensorboard import SummaryWriter
 import cornet
 import numpy as np
+import pdb
 writer = SummaryWriter(f'runs/skel_ae')
 #Transformations for ImageNet
 transform = transforms.Compose([
@@ -26,12 +27,12 @@ inv_normalize = transforms.Normalize(
 # specify loss function
 criterion = nn.MSELoss()
 
-epochs = 100
+epochs = 10
 actNum = 1024
 
 def save_model(model, epoch, optimizer, loss, file_path):
 
-    print('Saving model ...')
+    print('Saving model ...', epoch)
     #torch.save(model.state_dict(), f'{weights_dir}/cornet_classify_{cond}_{epoch}.pt')
     torch.save({
         'epoch': epoch,
@@ -92,10 +93,11 @@ for epoch in range(0, epochs):
     # train the model #
     ###################
     model.train()
-    for data in trainloader:
+    for data, label in trainloader:
         # move tensors to GPU if CUDA is available
         
         data = data.cuda()
+
             #print('moved to cuda')
         
         # clear the gradients of all optimized variables
@@ -132,7 +134,7 @@ for epoch in range(0, epochs):
     model.eval()
     accuracy = 0
     with torch.no_grad():
-        for data in valloader:
+        for data, label in valloader:
             # move tensors to GPU if CUDA is available
             
             data = data.cuda()

@@ -141,7 +141,7 @@ def calc_within_between():
                             for c2n, c2 in enumerate(exp_cond):
                                 #correlate the condition from d1 with df2
                                 rdm[c1n, c2n] = 1-np.corrcoef(df1[c1], df2[c2])[0,1]
-                                if rp == "":
+                                if rp == "" and c1n < c2n:
                                     rdm_df = rdm_df.append(pd.Series([c1, c2, np.corrcoef(df1[c1], df2[c2])[0,1]], index=rdm_df.columns), ignore_index=True)
                                 
                         #append RDMs from each run pair
@@ -152,6 +152,7 @@ def calc_within_between():
 
                     if rp == "": #only save if its all run RSA
                         #Save vector version
+                        
                         rdm_df.to_csv(f'{results_dir}/{roi}_rdm_vec.csv', index = False)
 
                     #average them together
@@ -198,8 +199,12 @@ def calc_within_between():
                     print(ss, {lr},rr)
 
 
-def calc_summary_rdms():
-    summary_df =pd.DataFrame(columns = ['roi', 'identity', 'category','between', 'identity_se', 'category_se','between_se'])
+def create_combined_rdm():
+    """
+    Average RDM vectors from each participant into one mean RDM
+    """
+
+    summary_df =pd.DataFrame(columns = ['stim1', 'stim2'])
 
     summary_dir = f'{study_dir}/derivatives/results/{exp}'
     os.makedirs(summary_dir, exist_ok = True)
@@ -210,82 +215,31 @@ def calc_summary_rdms():
             
             roi = f'{lr}{rr}' #set roi
         
-            all_rdms = []
-            for ss in subj_list:
+            sub_n = 0
+            for sn, ss in enumerate(subj_list):
                 sub_dir = f'{study_dir}/sub-{ss}/ses-02/derivatives'
                 results_dir = f'{sub_dir}/results/beta_summary/{exp}'
 
+                if os.path.exists(f'{sub_dir}/rois/{roi}.nii.gz'):
+                    sub_n = sub_n + 1
+                    curr_df = pd.read_csv(f'{results_dir}/{roi}_rdm_vec.csv')
 
-                all_rdms.append(np.loadtxt(f'{results_dir}/{roi}_RDM{suf}.csv',delimiter=',',dtype='float'))
-                
+                    #pdb.set_trace()
+                    if sn == 0:
+                        all_df = curr_df
+                    else:
+                        all_df['similarity'] = all_df['similarity'] + curr_df['similarity']
 
-                #pdb.set_trace()
-            all_rdms = np.array(all_rdms)
+            #print(roi, sub_n)
+            summary_df['stim1'] = all_df['stim1']
+            summary_df['stim2'] = all_df['stim2']  
+            summary_df[roi] =1 - (all_df['similarity']/sub_n)
+                    
 
-            #average them together
-            comb_rdm = np.mean(all_rdms, axis =0)
-            np.savetxt(f'{summary_dir}/{lr}{roi}_RDM{suf}.csv', comb_rdm, delimiter=',')
-            
-            
-            #save plot
-            sns_plot  = sns.heatmap(comb_rdm, linewidth=0.5)
-            sns_plot.figure.savefig(f'{summary_dir}/figures/{roi}_rdm{suf}.png')
-            plt.close()
+    
 
-            '''
-            figure out error bars!!
-            '''
-
-            #Pull out within-ident
-            ident_mat = np.identity(len(exp_cond))
-            ident_rdm = ident_mat * comb_rdm
-            ident_rdm[ident_rdm==0] = np.nan
-            
-            ident_rdm = ident_rdm.flatten()
-            ident_rdm = ident_rdm[~np.isnan(ident_rdm)]
-            ident_mean = np.nanmean(ident_rdm)
-            ident_se = stats.sem(ident_rdm)
-            
-            #ident_se = stats.sem(ident_rdm, nan_policy = 'omit')
-
-            #pull out between-cat
-            between_rdm = comb_rdm
-
-            #fill diagnol (within) zeros/nans
-            np.fill_diagonal(between_rdm,0)
-            between_rdm[between_rdm==0] = np.nan
-            cat_means =[]
-            cat_sems = []
-            #loop through category blocks
-            for ii in range(0,len(exp_cond), len(exp_cats)):
-                #extract corrs for a category by moving in 5 step increments
-                curr_cat = between_rdm[ii:ii+len(exp_cats), ii:ii+len(exp_cats)]
-                curr_cat = curr_cat.flatten()
-                curr_cat = curr_cat[~np.isnan(curr_cat)]
-                #append the mean for that category
-                cat_means.append(np.nanmean(curr_cat))
-                cat_sems.append(stats.sem(curr_cat))
-                #cat_se.append
-                #replace that category with nans so you can average later
-                between_rdm[ii:ii+len(exp_cats), ii:ii+len(exp_cats)] = np.nan
-
-            
-            #between_rdm = between_rdm.flatten()
-            #between_rdm = between_rdm[~np.isnan(between_rdm)]
-
-            cat_mean = np.mean(cat_means)
-            cat_se = np.mean(cat_sems)
-
-            between_rdm = between_rdm.flatten()
-            between_rdm = between_rdm[~np.isnan(between_rdm)]
-            #cat_se = stats.sem(cat_means, nan_policy = 'omit')
-            between_mean =  np.nanmean(between_rdm)
-            between_se = stats.sem(between_rdm)
-            #between_se =   stats.sem(between_rdm, nan_policy = 'omit')
-            #pdb.set_trace()
-            summary_df = summary_df.append(pd.Series([roi, ident_mean, cat_mean, between_mean, ident_se, cat_se, between_se],index = summary_df.columns),ignore_index=True)
-    summary_df.to_csv(f'{summary_dir}/mvpa_summary_rdms{suf}.csv', index = False)
-    print(ss, {lr},rr)
+    summary_df.to_csv(f'{summary_dir}/allrois_rdm.csv', index = False)
+    
 
 
 def calc_summary_mvpa():
@@ -331,9 +285,12 @@ def calc_summary_mvpa():
 
 #extract_acts()
 #sort_by_functional()
-calc_within_between()
+
 
 #calc_summary_mvpa()
+
+#calc_within_between()
+create_combined_rdm()
 
 
 
