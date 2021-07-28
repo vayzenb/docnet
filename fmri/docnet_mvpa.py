@@ -27,7 +27,8 @@ rois = ["LO_toolloc", 'PFS_toolloc', 'PPC_spaceloc', 'APC_spaceloc', 'PPC_depthl
 
 exp = 'catmvpa' #experimental tasks
 #exp_suf = ["_12", '_34', '_13', '_24', '_14', '_23']
-exp_suf = ["", "_odd", "_even",""]
+exp_suf = ["", "_odd", "_even"]
+exp_suf =['']
 
 exp_cond = [ 'boat_1', 'boat_2', 'boat_3', 'boat_4', 'boat_5',
 'camera_1', 'camera_2', 'camera_3', 'camera_4', 'camera_5',
@@ -97,6 +98,8 @@ def calc_within_between():
     '''
     load voxel acts from each highlevel and correlate in pairs
     to make asymmetric RDMs
+
+    This func makes both combined rdms and odd/even splits
     '''
 
     #run_pairs = [["_12",'_13', '_14'],['_34','_24', '_23' ]]
@@ -107,6 +110,7 @@ def calc_within_between():
     
     for ss in subj_list:
         summary_df =pd.DataFrame(columns = ['roi', 'identity', 'category','between'])
+        
         sub_dir = f'{study_dir}/sub-{ss}/ses-02/derivatives'
         raw_dir = f'{sub_dir}/results/beta/{exp}'
         results_dir = f'{sub_dir}/results/beta_summary/{exp}'
@@ -119,7 +123,7 @@ def calc_within_between():
                 
                 roi = f'{lr}{rr}' #set roi
                 if os.path.exists(f'{sub_dir}/rois/{roi}.nii.gz'):
-                    
+                    rdm_df = pd.DataFrame(columns= ['stim1', 'stim2', 'similarity'])
 
                     all_rdms =[]
                     for rpn, rp in enumerate(run_pairs[0]):
@@ -130,21 +134,30 @@ def calc_within_between():
                         df2 = df2.iloc[0:num_vox,:]
 
                         rdm = np.zeros((len(exp_cond),len(exp_cond)))
+                        
                         #correlate with other runs
                         #This will fill out the entire matrix
                         for c1n, c1 in enumerate(exp_cond):
                             for c2n, c2 in enumerate(exp_cond):
                                 #correlate the condition from d1 with df2
                                 rdm[c1n, c2n] = 1-np.corrcoef(df1[c1], df2[c2])[0,1]
+                                if rp == "":
+                                    rdm_df = rdm_df.append(pd.Series([c1, c2, np.corrcoef(df1[c1], df2[c2])[0,1]], index=rdm_df.columns), ignore_index=True)
                                 
                         #append RDMs from each run pair
                         all_rdms.append(rdm)
                     #pdb.set_trace()
                     all_rdms = np.array(all_rdms)
+                    #rdm_vec = np.array(rdm_vec)
+
+                    if rp == "": #only save if its all run RSA
+                        #Save vector version
+                        rdm_df.to_csv(f'{results_dir}/{roi}_rdm_vec.csv', index = False)
 
                     #average them together
                     comb_rdm = np.mean(all_rdms, axis =0)
                     np.savetxt(f'{results_dir}/{roi}_RDM{suf}.csv', comb_rdm, delimiter=',',fmt='%1.3f')
+
                     
                     
                     
@@ -320,7 +333,7 @@ def calc_summary_mvpa():
 #sort_by_functional()
 calc_within_between()
 
-calc_summary_mvpa()
+#calc_summary_mvpa()
 
 
 

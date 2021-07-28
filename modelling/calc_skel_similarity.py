@@ -42,7 +42,7 @@ skel_rdm = pd.DataFrame(columns=['obj1', 'obj2', 'similarity'])
 
 for sk1n, sk1 in enumerate(skelfiles):
     obj1 = sk1.replace(skel_folder + '/', '')
-    obj1 = obj1[:-4]
+    obj1 = obj1[:-7]
 
     skel1 = np.loadtxt(sk1, delimiter = ',')
     skel1 = skel1[:,0:2]
@@ -64,6 +64,7 @@ for sk1n, sk1 in enumerate(skelfiles):
         skel_dist = []
         for ii in range(0,len(skel1)):
             curr_point = []
+            
             for jj in range(0,len(skel2)):
                 curr_point.append(np.linalg.norm(skel1[ii,:] - skel2[jj,:]))
                 
@@ -72,7 +73,7 @@ for sk1n, sk1 in enumerate(skelfiles):
             skel_dist.append(np.min(curr_point))
         
         #find average dist
-        skel_dist1= np.mean(skel_dist1)
+        skel_dist1= np.mean(skel_dist)
 
         #Calculate distance from skel2 to skel1
         skel_dist = []
@@ -90,6 +91,9 @@ for sk1n, sk1 in enumerate(skelfiles):
         #average the final distance values
         final_vals = pd.Series([obj1, obj2, np.mean([skel_dist1,skel_dist2])], index=skel_rdm.columns)
         skel_rdm = skel_rdm.append(final_vals, ignore_index=True)
+
+#pdb.set_trace()
+skel_rdm.to_csv('rdms/skel_rdm.csv', index = False)
 
 
 

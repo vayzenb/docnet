@@ -29,8 +29,8 @@ import pdb
 stim_folder = "/home/vayzenbe/GitHub_Repos/docnet/stim/binary"
 out_folder = "/home/vayzenbe/GitHub_Repos/docnet/stim/"
 
-stim_folder = "C:/Users/vayze/Desktop/GitHub_Repos/docnet/stim/binary"
-out_folder = "C:/Users/vayze/Desktop/GitHub_Repos/docnet/stim"
+#stim_folder = "C:/Users/vayze/Desktop/GitHub_Repos/docnet/stim/binary"
+#out_folder = "C:/Users/vayze/Desktop/GitHub_Repos/docnet/stim"
 skel = ['23', '26', '31', '31_0', '31_50']
 SF = ['Skel','Bulge']
 
@@ -193,7 +193,7 @@ for imf in imfiles:
     
     skeletonImage[skeletonImage < flux_threshold] = 0
     skelim = np.interp(skeletonImage, (skeletonImage.min(), skeletonImage.max()), (0, 255))
-    skelim = skelim[pad_num:(skelim.shape[0]-pad_num), pad_num:(skelim.shape[1]-pad_num)]
+    #skelim = skelim[pad_num:(skelim.shape[0]-pad_num), pad_num:(skelim.shape[1]-pad_num)]
     
     #plt.imshow(skelim, cmap="gray")
     #save coords

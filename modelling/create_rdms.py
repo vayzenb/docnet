@@ -19,7 +19,7 @@ from scipy import stats, spatial
 import pdb
 
 model_types = ['cornet_s']
-model_types = ['skel']
+
 
 transform = transforms.Compose([
         transforms.Resize((224, 224)),
@@ -108,5 +108,5 @@ for mm in model_types:
     im_pair = np.array(im_pair)
 
     df = pd.DataFrame({'stim1': im_pair[:,0],'stim2' : im_pair[:,1],'similarity': rdm})
-    df.to_csv(f'rdms/{mm}.csv')
+    df.to_csv(f'rdms/{mm}_rdm.csv', index=False)
 
