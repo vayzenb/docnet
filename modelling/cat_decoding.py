@@ -21,6 +21,8 @@ subj_list=["docnet2001", "docnet2002","docnet2003","docnet2005", "docnet2007","d
 d_roi = ['LOC','PPC_spaceloc', 'APC_spaceloc', 'PPC_depthloc', 'APC_depthloc', 'PPC_distloc',  'APC_distloc', 'PPC_toolloc', 'APC_toolloc']
 v_roi = ['LO_toolloc', 'PFS_toolloc']
 
+svm_test_size = .2
+svm_splits = 20
 
 exp_cond = [ 'boat_1', 'boat_2', 'boat_3', 'boat_4', 'boat_5',
 'camera_1', 'camera_2', 'camera_3', 'camera_4', 'camera_5',
@@ -102,7 +104,7 @@ for sn, ss in enumerate(subj_list):
                 #run SVM
                 X = roi_data
                 y = exp_labels
-                sss = StratifiedShuffleSplit(n_splits=10, test_size=0.2)
+                sss = StratifiedShuffleSplit(n_splits=svm_splits, test_size=svm_test_size)
                 sss.get_n_splits(X, y)
                 
                 roi_acc = []
