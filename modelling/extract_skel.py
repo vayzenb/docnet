@@ -46,7 +46,6 @@ def sample_sphere_2D(number_of_samples):
     return sphere_points
 
 
-
 def sub2ind(array_shape, rows, cols):
     ind = rows*array_shape[1] + cols
     ind[ind < 0] = -1

@@ -13,7 +13,8 @@ matplotlib.use('Agg')
 
 study ='spaceloc'
 
-subj_list=["spaceloc1001"]
+subj_list=["spaceloc1001", "spaceloc1002", "spaceloc1003", "spaceloc1004", "spaceloc1005", "spaceloc1006", "spaceloc1007",
+"spaceloc1008" ,"spaceloc1009", "spaceloc1010", "spaceloc1011" ,"spaceloc1012" ]
 
 loc_suf = "_spaceloc" #runs to pull ROIs from
 exp = ['spaceloc','depthloc','distloc','toolloc'] #experimental tasks
@@ -209,9 +210,9 @@ def calc_mvpa():
 
 
 
-#extract_acts()
-#calc_selectivity()
-calc_mvpa()
+extract_acts()
+calc_selectivity()
+#calc_mvpa()
 
 
 

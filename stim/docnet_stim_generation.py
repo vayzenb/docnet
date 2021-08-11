@@ -4,19 +4,22 @@ import numpy as np
 import os
 from glob import glob
 from math import radians
+import time
+import pdb
 
-#blender loc: /lab_data/hawk/blender/blender-2.93.2
+#terminal commands: 
+#/lab_data/hawk/blender/blender-2.93.2/blender -b docnet_image_creation.blend -P docnet_stim_generation.py
 bpy.context.scene.render.engine = 'CYCLES'
 curr_dir = '/home/vayzenbe/GitHub_Repos/docnet/stim'
 os.chdir(curr_dir)
 model_dir = '/lab_data/behrmannlab/image_sets/ShapeNetCore.v2'
 out_dir= '/lab_data/behrmannlab/image_sets/ShapeNet_images'
-im_dir = f'{curr_dir}/obj_images'
+#im_dir = f'{curr_dir}/obj_images'
 
 #Start orient
 angle_increments = 30
-min_angle = -90
-max_angle = 90
+min_angle = -75
+max_angle = 75
 #num_orients = max_angle/angle_increments
 
 #set background color
@@ -31,6 +34,7 @@ num_obj = 1
 cat_folders = glob(f'{model_dir}/*')
 
 #loop through object classes
+t1 = time.perf_counter()
 for cln, cl in enumerate(cat_folders):
     exemplar_list = glob(f'{cl}/*')
 
@@ -39,7 +43,7 @@ for cln, cl in enumerate(cat_folders):
     if len(exemplar_list) > 300:
 
         #create image directory for object class
-        os.makedirs(f'{out_dir}/{cl[-8:]}', exist_ok = True)
+        os.makedirs(f'{out_dir}/{cl.split("/")[-1]}', exist_ok = True)
         
         #load all folders in class folder
         
@@ -48,7 +52,9 @@ for cln, cl in enumerate(cat_folders):
         random.shuffle(exemplar_list)
         
         #loop through objects in class folder
-        for obn, ob in enumerate(exemplar_list[:num_obj]):    
+        for obn, ob in enumerate(exemplar_list[:num_obj]):  
+            obj_name = ob.split('/')[-1]
+            
             #unselect everything
             bpy.ops.object.select_all(action='DESELECT')
             
@@ -110,10 +116,12 @@ for cln, cl in enumerate(cat_folders):
                # bpy.ops.material.new()
                 
                 #rotate object
-            bpy.context.object.rotation_euler.z = radians(random.randint(-90,90))
+            bpy.context.object.rotation_euler.z = radians(random.randint(-min_angle,max_angle))
+            #bpy.context.object.rotation_euler.z = radians(random.randint(-65,65))
         
             #Set file path for the render
-            bpy.context.scene.render.filepath = f'{curr_dir}/obj_images/{model_list[cln,1]}/{model_list[cln,1]}_{obn}_{curr_orient}.jpg'
+            #pdb.set_trace()
+            bpy.context.scene.render.filepath = f'{out_dir}/{cl.split("/")[-1]}/{obj_name}.jpg'
 
             #Take the picture
             bpy.ops.render.render(write_still = True)
@@ -123,3 +131,6 @@ for cln, cl in enumerate(cat_folders):
             #Delete selected object
             bpy.ops.object.delete()
             
+print('')
+print('')
+print('***TOTAL ELAPSED TIME***', time.perf_counter()-t1)
