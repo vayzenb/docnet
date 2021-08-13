@@ -18,7 +18,7 @@ out_dir= '/lab_data/behrmannlab/image_sets/ShapeNet_images'
 
 #Start orient
 angle_increments = 30
-min_angle = -75
+min_angle = (-75)
 max_angle = 75
 #num_orients = max_angle/angle_increments
 
@@ -26,7 +26,7 @@ max_angle = 75
 #bpy.context.scene.world.horizon_color = (.184, .184, .184)
 
 #how many objects to use for each class
-num_obj = 1
+num_obj = 2
 
 #Load model list
 #model_list = np.loadtxt(f'{curr_dir}/model_list.csv', delimiter=',', dtype=object)
@@ -115,8 +115,11 @@ for cln, cl in enumerate(cat_folders):
               #  bpy.context.object.active_material_index = mn
                # bpy.ops.material.new()
                 
-                #rotate object
-            bpy.context.object.rotation_euler.z = radians(random.randint(-min_angle,max_angle))
+            #rotate object
+            rand_rot = random.randint(min_angle,max_angle)
+            #db.set_trace()
+
+            bpy.context.object.rotation_euler.z = radians(rand_rot)
             #bpy.context.object.rotation_euler.z = radians(random.randint(-65,65))
         
             #Set file path for the render
