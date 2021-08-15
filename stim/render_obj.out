@@ -1,0 +1,11 @@
+Failed to create secure directory (/run/user/21468/pulse): No such file or directory
+Blender 2.93.2 (hash 1eb06de2607a built 2021-08-04 00:16:44)
+/run/user/21468/gvfs/ non-existent directory
+Read blend: /home/vayzenbe/GitHub_Repos/docnet/stim/docnet_image_creation.blend
+Traceback (most recent call last):
+  File "/home/vayzenbe/GitHub_Repos/docnet/stim/docnet_stim_generation.py", line 128, in <module>
+    for obn, ob in enumerate(exemplar_list[:num_obj]):  
+TypeError: slice indices must be integers or None or have an __index__ method
+Error: File format is not supported in file '/lab_data/behrmannlab/image_sets/ShapeNetCore.v2/04401088'
+
+Blender quit

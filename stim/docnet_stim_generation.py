@@ -21,17 +21,20 @@ out_dir= '/lab_data/behrmannlab/image_sets/ShapeNet_images'
 angle_increments = 30
 min_angle = (-75)
 max_angle = 75
-#num_orients = max_angle/angle_increments
 
-#set background color
-#bpy.context.scene.world.horizon_color = (.184, .184, .184)
+size_inc = .1
 
+min_size = .30
+max_size = .35
+
+#load class name from python
+cl = sys.argv[1]
 #how many objects to use for each class
-num_obj = 2
+num_obj = int(sys.argv[2])
+
 
 #Load model list
 #model_list = np.loadtxt(f'{curr_dir}/model_list.csv', delimiter=',', dtype=object)
-
 
 
 def create_object(obn, ob):
@@ -58,10 +61,31 @@ def create_object(obn, ob):
     curr_obj.select_set(True)
     bpy.context.view_layer.objects.active = curr_obj
 
-    #change scale if relevant
-    #bpy.context.object.scale = [float(model_list[cln,2]), float(model_list[cln,2]), float(model_list[cln,2])]
-    #bpy.context.object.location.z =  float(model_list[cln,3])
+    #move and change scale if relevant
+    bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS', center='MEDIAN')
 
+    bpy.context.object.location = [0, 0, 0]
+    
+    
+    curr_inc = 1.0
+    if (bpy.context.object.dimensions[0]*bpy.context.object.dimensions[1]) < min_size:
+
+        while (bpy.context.object.dimensions[0]*bpy.context.object.dimensions[1]) < min_size:
+            curr_inc = float(curr_inc + size_inc)
+            bpy.context.object.scale = [curr_inc, curr_inc, curr_inc]
+            bpy.context.view_layer.update()
+
+            if curr_inc >= 1.8:
+                break
+            
+    elif (bpy.context.object.dimensions[0]*bpy.context.object.dimensions[1]) > max_size:
+        while (bpy.context.object.dimensions[0]*bpy.context.object.dimensions[1]) > max_size:
+            curr_inc = float(curr_inc - size_inc)
+            bpy.context.object.scale = [curr_inc, curr_inc, curr_inc]
+            bpy.context.view_layer.update()
+            
+            if curr_inc <= .8:
+                break
 
     #Remove the material from the object
     for mat_n, material in enumerate(bpy.data.materials):
@@ -116,8 +140,6 @@ def create_object(obn, ob):
     #Delete selected object
     bpy.ops.object.delete()
 
-#load class name from python
-cl = sys.argv[1]
 
 #create image directory for object class
 os.makedirs(f'{out_dir}/{cl.split("/")[-1]}', exist_ok = True)
@@ -130,10 +152,6 @@ random.shuffle(exemplar_list)
 
 #loop through objects in class folder
 for obn, ob in enumerate(exemplar_list[:num_obj]):  
+    print(ob)
     result = create_object(obn, ob)
 
-#result.compute()
-
-print('')
-print('')
-print('***TOTAL ELAPSED TIME***', time.perf_counter()-t1)
