@@ -7,6 +7,7 @@ from math import radians
 import time
 import pdb
 import sys
+import pdb
 
 #terminal commands: 
 #/lab_data/hawk/blender/blender-2.93.2/blender -b docnet_image_creation.blend -P docnet_stim_generation.py
@@ -28,9 +29,10 @@ min_size = .30
 max_size = .35
 
 #load class name from python
-cl = sys.argv[1]
+#it's arg 5 & 6, because all the blender stuff is 1-4
+cl = sys.argv[5]
 #how many objects to use for each class
-num_obj = int(sys.argv[2])
+num_obj = int(sys.argv[6])
 
 
 #Load model list
@@ -153,5 +155,8 @@ random.shuffle(exemplar_list)
 #loop through objects in class folder
 for obn, ob in enumerate(exemplar_list[:num_obj]):  
     print(ob)
-    result = create_object(obn, ob)
+    try:
+        create_object(obn, ob)
+    except:
+        continue
 
