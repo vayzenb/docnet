@@ -6,7 +6,7 @@ import time
 job_name = 'render_obj'
 mem = 24
 run_time = "1-00:00:00"
-num_obj = 10
+num_obj = 300
 
 model_dir = "/scratch/vayzenbe/ShapeNetCore.v2"
 out_dir= '/scratch/vayzenbe/ShapeNet_images'
@@ -14,11 +14,13 @@ model_dir = '/lab_data/behrmannlab/image_sets/ShapeNetCore.v2'
 out_dir= '/lab_data/behrmannlab/image_sets/ShapeNet_images'
 #the sbatch setup info
 
-move_files = f"""
-mkdir -p /scratch/vayzenbe/
-rsync -a /lab_data/behrmannlab/image_sets/ShapeNetCore.v2 /scratch/vayzenbe/
-rsync -a /lab_data/behrmannlab/image_sets/ShapeNet_images /scratch/vayzenbe/
-"""
+def move_files(cl):
+    move_files = f"""
+    mkdir -p /scratch/vayzenbe/
+    rsync -a /lab_data/behrmannlab/image_sets/ShapeNetCore.v2/{cl} /scratch/vayzenbe/
+    rsync -a /lab_data/behrmannlab/image_sets/ShapeNet_images /scratch/vayzenbe/
+    """
+    return move_files
 
 def setup_sbatch(cl):
     sbatch_setup = f"""#!/bin/bash -l
@@ -66,7 +68,7 @@ for cln, cl in enumerate(cat_folders):
     
     if len(exemplar_list) > 300:
         job_cmd = f'/lab_data/hawk/blender/blender-2.93.2/blender -b docnet_image_creation.blend -P docnet_stim_generation.py {cl} {num_obj}'
-        f = open(f"{job_name}_cl.sh", "a")
+        f = open(f"{job_name}.sh", "a")
         f.writelines(setup_sbatch(cl))
         f.writelines(job_cmd)
         f.close()

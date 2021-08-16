@@ -27,6 +27,7 @@ size_inc = .1
 
 min_size = .30
 max_size = .35
+max_length = 1.1
 
 #load class name from python
 #it's arg 5 & 6, because all the blender stuff is 1-4
@@ -77,7 +78,7 @@ def create_object(obn, ob):
             bpy.context.object.scale = [curr_inc, curr_inc, curr_inc]
             bpy.context.view_layer.update()
 
-            if curr_inc >= 1.8:
+            if bpy.context.object.dimensions[0] > max_length or bpy.context.object.dimensions[1] > max_length or bpy.context.object.dimensions[2] > max_length:
                 break
             
     elif (bpy.context.object.dimensions[0]*bpy.context.object.dimensions[1]) > max_size:
@@ -86,7 +87,7 @@ def create_object(obn, ob):
             bpy.context.object.scale = [curr_inc, curr_inc, curr_inc]
             bpy.context.view_layer.update()
             
-            if curr_inc <= .8:
+            if curr_inc <= .6:
                 break
 
     #Remove the material from the object
