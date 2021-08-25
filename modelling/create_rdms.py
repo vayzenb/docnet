@@ -29,6 +29,7 @@ transform = transforms.Compose([
                                              std=[0.229, 0.224, 0.225])])
 
 cos = nn.CosineSimilarity(dim=0, eps=1e-6)
+euc = nn.PairwiseDistance(p=2.0, eps=1e-06, keepdim=False)
 
 im_count =25
 
