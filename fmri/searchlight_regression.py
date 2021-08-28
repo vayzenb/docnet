@@ -14,6 +14,7 @@ import time
 import os
 import statsmodels.api as sm
 from nilearn.datasets import load_mni152_brain_mask
+import pdb
 
 alpha = .05
 
@@ -36,12 +37,17 @@ def calc_rsa(data, sl_mask, myrad, bcvar):
     
     bolddata_sl = data4D.reshape(sl_mask.shape[0] * sl_mask.shape[1] * sl_mask.shape[2], data[0].shape[3]).T
     
-    brain_rdm = 1-np.corrcoef(bolddata_sl)
+    brain_rdm = np.corrcoef(bolddata_sl)
     brain_rdm = np.round_(brain_rdm, decimals=6)
-    upper = np.triu(brain_rdm,0)
-    brain_vec = upper.flatten()
+    upper = np.triu_indices(25,1)
+    brain_vec = brain_rdm[upper]
+
+
+    brain_vec = np.arctanh(brain_vec) #convert to fisher z
+    brain_vec = ((brain_vec-brain_vec.mean())/brain_vec.std()) *-1 #z-score and invert
+    if len(brain_vec) != 300:
+        pdb.set_trace() 
     
-    brain_vec = brain_vec[brain_vec!= 0]
     X = bcvar[['skel', 'cornet_s']]
     y = brain_vec
     model = sm.OLS(y, X).fit()
@@ -82,7 +88,7 @@ for ss in subs:
     print("Input data shape: " + str(data.shape))
     print("Input mask shape: " + str(mask.shape) + "\n")
 
-    sl = Searchlight(sl_rad=sl_rad,max_blk_edge=max_blk_edge, shape = shape, min_active_voxels_proportion= voxels_proportion) #setup the searchlight
+    sl = Searchlight(sl_rad=sl_rad,max_blk_edge=max_blk_edge, shape = shape) #setup the searchlight
     sl.distribute([data], mask) #send the 4dimg and mask
     sl.broadcast(bcvar) #send the relevant analysis vars
 
