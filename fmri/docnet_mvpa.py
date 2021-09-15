@@ -26,9 +26,9 @@ rois = ["LO_toolloc", 'PFS_toolloc', 'PPC_spaceloc', 'APC_spaceloc', 'PPC_depthl
 
 
 exp = 'catmvpa' #experimental tasks
-#exp_suf = ["_12", '_34', '_13', '_24', '_14', '_23']
+
 exp_suf = ["", "_odd", "_even"]
-exp_suf =['']
+
 
 exp_cond = [ 'boat_1', 'boat_2', 'boat_3', 'boat_4', 'boat_5',
 'camera_1', 'camera_2', 'camera_3', 'camera_4', 'camera_5',
@@ -37,13 +37,29 @@ exp_cond = [ 'boat_1', 'boat_2', 'boat_3', 'boat_4', 'boat_5',
 'lamp_1', 'lamp_2', 'lamp_3', 'lamp_4', 'lamp_5']
 exp_cats = ['boat', 'camera',' car', 'guitar','lamp']
 exp_cope=list(range(1,26))#copes for localizer runs; corresponding numerically t
+#suf="_combined"
 suf="_combined"
 
+def copy_rois():
+    """
+    Copies ROIs from spaceloc directory to docnet one
+    """
+    print("copying rois...")
+    spaceloc_dir = f"/lab_data/behrmannlab/vlad/spaceloc"
+    
+    for ss in subj_list:
+        print(ss)
+        space_rois = f'{spaceloc_dir}/sub-spaceloc10{ss[-2:]}/ses-01/derivatives/rois'
+        sub_rois = f'{study_dir}/sub-{ss}/ses-02/derivatives/'
+        bash_cmd = f'rsync -aP {space_rois} {sub_rois}'
+        subprocess.run(bash_cmd.split(),check=True, capture_output=True, text=True)
+        #shutil.copytree(space_rois, sub_rois)
 
 def extract_acts():
     '''
     extract PEs for each condition
     '''
+    print('extracting rois acts')
     for ss in subj_list:
         sub_dir = f'{study_dir}/sub-{ss}/ses-02/derivatives'
         raw_dir = f'{sub_dir}/results/beta/{exp}'
@@ -61,6 +77,7 @@ def sort_by_functional():
     '''
     load each condition and sort by functional data
     '''
+    print('sorting data by roi functional activation')
     for ss in subj_list:
         sub_dir = f'{study_dir}/sub-{ss}/ses-02/derivatives'
         raw_dir = f'{sub_dir}/results/beta/{exp}'
@@ -97,16 +114,24 @@ def sort_by_functional():
 def calc_within_between():
     '''
     load voxel acts from each highlevel and correlate in pairs
-    to make asymmetric RDMs
+    to make symmetric/asymmetric RDMs
 
     This func makes both combined rdms and odd/even splits
+    
+    Also calculate within/between for category, identity, between
     '''
-
+    
+    
     #run_pairs = [["_12",'_13', '_14'],['_34','_24', '_23' ]]
-    run_pairs = [[''],['']]
+    if suf == '_split':
+        run_pairs = [['_even'],['_odd']]
+        print('Creating split asymmetric matrix for each sub..')
+    elif suf == '_combined':
+        run_pairs = [[''],['']]
+        print('Creating combined symmetric matrix for each sub..')
     
     
-    num_vox = 1000
+    num_vox = 200
     
     for ss in subj_list:
         summary_df =pd.DataFrame(columns = ['roi', 'identity', 'category','between'])
@@ -163,9 +188,9 @@ def calc_within_between():
                     
                     
                     #save plot
-                    sns_plot  = sns.heatmap(comb_rdm, linewidth=0.5)
-                    sns_plot.figure.savefig(f'{results_dir}/figures/{roi}_rdm{suf}.png')
-                    plt.close()
+                    #sns_plot  = sns.heatmap(comb_rdm, linewidth=0.5)
+                    #sns_plot.figure.savefig(f'{results_dir}/figures/{roi}_rdm{suf}.png')
+                    #plt.close()
 
                     #Pull out within-ident
                     ident_mat = np.identity(len(exp_cond))
@@ -203,6 +228,7 @@ def create_combined_rdm():
     """
     Average RDM vectors from each participant into one mean RDM
     """
+    print("Creating average RDM..")
 
     summary_df =pd.DataFrame(columns = ['stim1', 'stim2'])
 
@@ -246,6 +272,7 @@ def calc_summary_mvpa():
     '''
     Combine within/between results
     '''        
+    print('calculating within/between summary across subs...')
     #note: each sub might have different rois
 
     summary_df =pd.DataFrame(columns = ['roi', 'identity', 'category','between', 'identity_se', 'category_se','between_se'])
@@ -282,14 +309,14 @@ def calc_summary_mvpa():
 
 
 
-
+#copy_rois()
 #extract_acts()
-#sort_by_functional()
+sort_by_functional()
+
+calc_within_between()
+calc_summary_mvpa()
 
 
-#calc_summary_mvpa()
-
-#calc_within_between()
 create_combined_rdm()
 
 
