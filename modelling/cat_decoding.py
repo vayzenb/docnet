@@ -15,7 +15,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 import pandas as pd
 
-subj_list=["docnet2001", "docnet2002","docnet2003","docnet2005", "docnet2007","docnet2008", "docnet2012"]
+#subj_list=["docnet2001", "docnet2002","docnet2003","docnet2005", "docnet2007","docnet2008", "docnet2012"]
+subj_list=["docnet2001", "docnet2002","docnet2003","docnet2004", "docnet2005", "docnet2007","docnet2008", "docnet2012"]
+subj_list=["docnet2001", "docnet2003","docnet2004", "docnet2005", "docnet2007","docnet2008", "docnet2012"]
 
 #anatomical ROI
 d_roi = ['LOC','PPC_spaceloc', 'APC_spaceloc', 'PPC_depthloc', 'APC_depthloc', 'PPC_distloc',  'APC_distloc', 'PPC_toolloc', 'APC_toolloc']
@@ -44,101 +46,169 @@ n_vox = 100
 #do cross-val SVM seperately for each sub
 #combine across subs
 
-
-summary_df = pd.DataFrame(columns = ['sub'] + ["l" + s for s in d_roi] + ["r" + s for s in d_roi])
-for sn, ss in enumerate(subj_list):
-    subj_dir = f'/lab_data/behrmannlab/vlad/docnet/sub-{ss}/ses-02/{data_dir}'
-    roi_dir = f'/lab_data/behrmannlab/vlad/docnet/sub-{ss}/ses-02/derivatives/rois'
+def decode_single_roi():
+    all_rois = ['LO_toolloc', 'PFS_toolloc', 'PPC_spaceloc', 'APC_spaceloc', 'PPC_depthloc', 'APC_depthloc', 'PPC_distloc',  'APC_distloc', 'PPC_toolloc', 'APC_toolloc']
     
+    summary_df = pd.DataFrame(columns = ['sub'] + ["l" + s for s in all_rois] + ["r" + s for s in all_rois])
+    for sn, ss in enumerate(subj_list):
+        subj_dir = f'/lab_data/behrmannlab/vlad/docnet/sub-{ss}/ses-02/{data_dir}'
+        roi_dir = f'/lab_data/behrmannlab/vlad/docnet/sub-{ss}/ses-02/derivatives/rois'
 
-    roi_decode = []
-    for lr in ['l','r']:
-        for rr in d_roi:
-            
-            #load in ROI data for each stim condition
-            ventral_data = np.zeros((len(exp_cond), n_vox*2))
-            dorsal_data = np.zeros((len(exp_cond), n_vox))
-            for ecn, ec in enumerate(exp_cond):
-                #load in ventral data
-                if os.path.exists(f'{subj_dir}/{lr}LO_toolloc_{ec}.txt'):
-                    lo_data = np.loadtxt(f'{subj_dir}/{lr}LO_toolloc_{ec}.txt')
-                    if len(lo_data) >= n_vox:
-                        lo_data = lo_data[0:n_vox,:]
-                else:
-                    lo_data = np.zeros((n_vox,4))
-
-                if os.path.exists(f'{subj_dir}/{lr}PFS_toolloc_{ec}.txt'):
-                    pfs_data = np.loadtxt(f'{subj_dir}/{lr}PFS_toolloc_{ec}.txt')
-                    if len(pfs_data) >= n_vox:
-                        pfs_data = pfs_data[0:n_vox,:]
-
-                else:
-                    pfs_data = np.zeros((n_vox,4))
+        roi_decode = []
+        
+        
+        for lr in ['l','r']:
+            for rr in all_rois:
+                roi_data = np.zeros((len(exp_cond), n_vox))
+              
+                for ecn, ec in enumerate(exp_cond):
+                    #load in ventral data
+                    if os.path.exists(f'{subj_dir}/{lr}{rr}_{ec}.txt'):
+                        temp_data = np.loadtxt(f'{subj_dir}/{lr}{rr}_{ec}.txt')
+                        if len(temp_data) >= n_vox:
+                            roi_data[ecn,:] = temp_data[0:n_vox,3]
+                        else:
+                            roi_data[ecn,0:len(temp_data)] = temp_data[:,3]
+                            
+                        
                 
                 
-                temp_data = np.append(np.transpose(lo_data[:, 3]),np.transpose(pfs_data[:, 3])) 
-                ventral_data[ecn, 0:len(temp_data)] = temp_data 
 
-                #check if dorsal ROI exists and load it in
+                #check if ROI exists or is an LOC run before doing SVM
                 if os.path.exists(f'{roi_dir}/{lr}{rr}.nii.gz'):
+                    #print(f'{roi_dir}/{lr}{rr}.nii.gz')
+                    #run SVM
+                    X = roi_data
+                    y = exp_labels
                     
-                    dorsal_roi = np.loadtxt(f'{subj_dir}/{lr}{rr}_{ec}.txt')
-                    if len(dorsal_roi) < n_vox:
-                        dorsal_data[ecn, 0:len(dorsal_roi)] = np.transpose(dorsal_roi[:, 3])
-                    else:
-                        dorsal_data[ecn, :] = np.transpose(dorsal_roi[0:n_vox, 3])
+                    sss = StratifiedShuffleSplit(n_splits=svm_splits, test_size=svm_test_size)
+                    sss.get_n_splits(X, y)
 
-            #combine ventral and dorsal roi data
-            if rr == 'LOC':
-                roi_data = ventral_data
-            else:
-                roi_data = np.concatenate((ventral_data, dorsal_data), axis = 1)
+                    roi_acc = []
+                    for train_index, test_index in sss.split(X, y):
 
-            #pdb.set_trace()
-            #remove zero columns from df
-            idx = np.argwhere(np.all(roi_data[..., :] == 0, axis=0))
-            roi_data = np.delete(roi_data, idx, axis=1)
-            
-            #check if ROI exists or is an LOC run before doing SVM
-            if os.path.exists(f'{roi_dir}/{lr}{rr}.nii.gz') or rr == 'LOC':
-                #run SVM
-                X = roi_data
-                y = exp_labels
-                sss = StratifiedShuffleSplit(n_splits=svm_splits, test_size=svm_test_size)
-                sss.get_n_splits(X, y)
+                        X_train, X_test = X[train_index], X[test_index]
+                        y_train, y_test = y[train_index], y[test_index]
+
+                        #pdb.set_trace()
+                        clf = make_pipeline(StandardScaler(), SVC(gamma='auto'))
+                        clf.fit(X_train, y_train)   
+
+                        roi_acc.append(clf.score(X_test, y_test))
+                        #print(clf.score(X_test, y_test))
+
+                    #append each ROI score to 
+                    roi_decode.append(np.mean(roi_acc))
+                    print(ss, f'{lr}{rr}', np.mean(roi_acc))
+                else:# if roi doesn't exist, make it NAN
+                    roi_decode.append(np.NaN)
+                    #print(f'{roi_dir}/{lr}{rr}.nii.gz')
+                  
+        summary_df = summary_df.append(pd.Series([ss] + roi_decode, index = summary_df.columns), ignore_index= True)
+        summary_df.to_csv(f'decoding_summary_single_roi.csv', index = False)
                 
-                roi_acc = []
-                for train_index, test_index in sss.split(X, y):
+
+
+
+def decode_combined_roi():
+    """
+    iteratively combines ventral and dorsal ROIs to do decoding
+    """
+
+    summary_df = pd.DataFrame(columns = ['sub'] + ["l" + s for s in d_roi] + ["r" + s for s in d_roi])
+    for sn, ss in enumerate(subj_list):
+        subj_dir = f'/lab_data/behrmannlab/vlad/docnet/sub-{ss}/ses-02/{data_dir}'
+        roi_dir = f'/lab_data/behrmannlab/vlad/docnet/sub-{ss}/ses-02/derivatives/rois'
+
+
+        roi_decode = []
+        for lr in ['l','r']:
+            for rr in d_roi:
+
+                #load in ROI data for each stim condition
+                ventral_data = np.zeros((len(exp_cond), n_vox*2))
+                dorsal_data = np.zeros((len(exp_cond), n_vox))
+                for ecn, ec in enumerate(exp_cond):
+                    #load in ventral data
+                    if os.path.exists(f'{subj_dir}/{lr}LO_toolloc_{ec}.txt'):
+                        lo_data = np.loadtxt(f'{subj_dir}/{lr}LO_toolloc_{ec}.txt')
+                        if len(lo_data) >= n_vox:
+                            lo_data = lo_data[0:n_vox,:]
+                    else:
+                        lo_data = np.zeros((n_vox,4))
+
+                    if os.path.exists(f'{subj_dir}/{lr}PFS_toolloc_{ec}.txt'):
+                        pfs_data = np.loadtxt(f'{subj_dir}/{lr}PFS_toolloc_{ec}.txt')
+                        if len(pfs_data) >= n_vox:
+                            pfs_data = pfs_data[0:n_vox,:]
+
+                    else:
+                        pfs_data = np.zeros((n_vox,4))
+
+
+                    temp_data = np.append(np.transpose(lo_data[:, 3]),np.transpose(pfs_data[:, 3])) 
+                    ventral_data[ecn, 0:len(temp_data)] = temp_data 
+
+                    #check if dorsal ROI exists and load it in
+                    if os.path.exists(f'{roi_dir}/{lr}{rr}.nii.gz'):
+
+                        dorsal_roi = np.loadtxt(f'{subj_dir}/{lr}{rr}_{ec}.txt')
+                        if len(dorsal_roi) < n_vox:
+                            dorsal_data[ecn, 0:len(dorsal_roi)] = np.transpose(dorsal_roi[:, 3])
+                        else:
+                            dorsal_data[ecn, :] = np.transpose(dorsal_roi[0:n_vox, 3])
+
+                #combine ventral and dorsal roi data
+                if rr == 'LOC':
+                    roi_data = ventral_data
+                else:
+                    roi_data = np.concatenate((ventral_data, dorsal_data), axis = 1)
+
+                #pdb.set_trace()
+                #remove zero columns from df
+                idx = np.argwhere(np.all(roi_data[..., :] == 0, axis=0))
+                roi_data = np.delete(roi_data, idx, axis=1)
+
+                #check if ROI exists or is an LOC run before doing SVM
+                if os.path.exists(f'{roi_dir}/{lr}{rr}.nii.gz') or rr == 'LOC':
+                    #run SVM
+                    X = roi_data
+                    y = exp_labels
                     
-                    X_train, X_test = X[train_index], X[test_index]
-                    y_train, y_test = y[train_index], y[test_index]
+                    sss = StratifiedShuffleSplit(n_splits=svm_splits, test_size=svm_test_size)
+                    sss.get_n_splits(X, y)
 
-                    #pdb.set_trace()
-                    clf = make_pipeline(StandardScaler(), SVC(gamma='auto'))
-                    clf.fit(X_train, y_train)   
-                    
-                    roi_acc.append(clf.score(X_test, y_test))
-                    #print(clf.score(X_test, y_test))
+                    roi_acc = []
+                    for train_index, test_index in sss.split(X, y):
 
-                #append each ROI score to 
-                roi_decode.append(np.mean(roi_acc))
-                print(ss, f'{lr}{rr}', np.mean(roi_acc))
-            else:# if roi doesn't exist, make it NAN
-                roi_decode.append(np.NaN)
+                        X_train, X_test = X[train_index], X[test_index]
+                        y_train, y_test = y[train_index], y[test_index]
 
-    #pdb.set_trace()
-    #append final data to summary
-    summary_df = summary_df.append(pd.Series([ss] + roi_decode, index = summary_df.columns), ignore_index= True)
-    summary_df.to_csv(f'decoding_summary.csv', index = False)
+                        #pdb.set_trace()
+                        clf = make_pipeline(StandardScaler(), SVC(gamma='auto'))
+                        clf.fit(X_train, y_train)   
+
+                        roi_acc.append(clf.score(X_test, y_test))
+                        #print(clf.score(X_test, y_test))
+
+                    #append each ROI score to 
+                    roi_decode.append(np.mean(roi_acc))
+                    print(ss, f'{lr}{rr}', np.mean(roi_acc))
+                else:# if roi doesn't exist, make it NAN
+                    roi_decode.append(np.NaN)
+
+        #pdb.set_trace()
+        #append final data to summary
+        summary_df = summary_df.append(pd.Series([ss] + roi_decode, index = summary_df.columns), ignore_index= True)
+        summary_df.to_csv(f'decoding_summary_combined_roi.csv', index = False)
 
 
 
 
                 #ventral_data[ecn, :] 
-        
+
             #for rr in d_roi:
 
 
-
-
-
+#decode_single_roi()
+decode_combined_roi()

@@ -268,7 +268,7 @@ def calc_mvpa():
     
                         plot_vsf(sub_dir,df_roll,roi,cond_names + ['between'], 'Correlations',True,f'{roi}_correlations')
                             
-                        df_roll.to_csv(f'{results_dir}/{ss}_{roi}_corrselations.csv', index = False)
+                        df_roll.to_csv(f'{results_dir}/{ss}_{roi}_correlations.csv', index = False)
                         
                         
                         df_sum = df_roll.head(peak_vox)
@@ -336,8 +336,8 @@ def group_summaries(data_type):
 
 
 #extract_acts()
-#calc_selectivity()
-#calc_mvpa()
+calc_selectivity()
+calc_mvpa()
 
 
 

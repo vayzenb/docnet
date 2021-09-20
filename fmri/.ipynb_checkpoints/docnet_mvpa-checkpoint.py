@@ -18,8 +18,9 @@ sub info
 '''
 study ='docnet'
 study_dir = f"/lab_data/behrmannlab/vlad/{study}"
-subj_list=["docnet2001", "docnet2002","docnet2003","docnet2005", "docnet2007","docnet2008", "docnet2012"]
-#subj_list=["docnet2001", "docnet2003","docnet2005","docnet2008", "docnet2012"]
+subj_list=["docnet2001", "docnet2002","docnet2003","docnet2004", "docnet2005", "docnet2007","docnet2008", "docnet2012"]
+subj_list=["docnet2001", "docnet2003","docnet2004", "docnet2005", "docnet2008", "docnet2012"]
+#subj_list=["docnet2004"]
 
  #runs to pull ROIs from
 rois = ["LO_toolloc", 'PFS_toolloc', 'PPC_spaceloc', 'APC_spaceloc', 'PPC_depthloc', 'PPC_distloc', 'APC_depthloc', 'APC_distloc', 'PPC_toolloc', 'APC_toolloc']
@@ -28,6 +29,7 @@ rois = ["LO_toolloc", 'PFS_toolloc', 'PPC_spaceloc', 'APC_spaceloc', 'PPC_depthl
 exp = 'catmvpa' #experimental tasks
 
 exp_suf = ["", "_odd", "_even"]
+exp_suf = [""]
 
 
 exp_cond = [ 'boat_1', 'boat_2', 'boat_3', 'boat_4', 'boat_5',
@@ -39,6 +41,8 @@ exp_cats = ['boat', 'camera',' car', 'guitar','lamp']
 exp_cope=list(range(1,26))#copes for localizer runs; corresponding numerically t
 #suf="_combined"
 suf="_combined"
+
+num_vox = 100
 
 def copy_rois():
     """
@@ -131,7 +135,7 @@ def calc_within_between():
         print('Creating combined symmetric matrix for each sub..')
     
     
-    num_vox = 200
+    
     
     for ss in subj_list:
         summary_df =pd.DataFrame(columns = ['roi', 'identity', 'category','between'])
@@ -165,7 +169,8 @@ def calc_within_between():
                         for c1n, c1 in enumerate(exp_cond):
                             for c2n, c2 in enumerate(exp_cond):
                                 #correlate the condition from d1 with df2
-                                rdm[c1n, c2n] = 1-np.corrcoef(df1[c1], df2[c2])[0,1]
+                                rdm[c1n, c2n] = np.arctanh(np.corrcoef(df1[c1], df2[c2])[0,1])
+                                #rdm[c1n, c2n] = np.linalg.norm(df1[c1] - df2[c2])
                                 if rp == "" and c1n < c2n:
                                     rdm_df = rdm_df.append(pd.Series([c1, c2, np.corrcoef(df1[c1], df2[c2])[0,1]], index=rdm_df.columns), ignore_index=True)
                                 
@@ -188,9 +193,9 @@ def calc_within_between():
                     
                     
                     #save plot
-                    #sns_plot  = sns.heatmap(comb_rdm, linewidth=0.5)
-                    #sns_plot.figure.savefig(f'{results_dir}/figures/{roi}_rdm{suf}.png')
-                    #plt.close()
+                    sns_plot  = sns.heatmap(comb_rdm, linewidth=0.5)
+                    sns_plot.figure.savefig(f'{results_dir}/figures/{roi}_rdm{suf}.png')
+                    plt.close()
 
                     #Pull out within-ident
                     ident_mat = np.identity(len(exp_cond))
@@ -276,7 +281,7 @@ def calc_summary_mvpa():
     #note: each sub might have different rois
 
     summary_df =pd.DataFrame(columns = ['roi', 'identity', 'category','between', 'identity_se', 'category_se','between_se'])
-
+    subj_summary=pd.DataFrame(columns = ['subj'] +["l" + s for s in rois] + ["r" + s for s in rois])
     summary_dir = f'{study_dir}/derivatives/results/{exp}'
     os.makedirs(summary_dir, exist_ok = True)
     os.makedirs(f'{summary_dir}/figures', exist_ok = True)
@@ -284,6 +289,7 @@ def calc_summary_mvpa():
     for lr in ['l','r']: #set left and right    
         for rr in rois:
             roi_vals = []
+            #all_subs = []
             for ss in subj_list:
                 sub_dir = f'{study_dir}/sub-{ss}/ses-02/derivatives'
                 results_dir = f'{sub_dir}/results/beta_summary/{exp}'
@@ -296,10 +302,13 @@ def calc_summary_mvpa():
                     #extract and append data from current roi
                     curr_roi = df.loc[df['roi'] == f'{lr}{rr}',:].values.flatten().tolist()
                     roi_vals.append(curr_roi[1:])
+                    
+                    #
 
                     #roi_vals.append(df.loc[df['roi'] == f'{lr}{rr}',:].values.flatten().tolist())
             roi_vals = np.array(roi_vals)
 
+            
             roi_means = pd.Series([f'{lr}{rr}'] + np.mean(roi_vals, axis = 0).tolist() + stats.sem(roi_vals, axis = 0).tolist(),index = summary_df.columns)
             summary_df = summary_df.append(roi_means,ignore_index=True)
     summary_df.to_csv(f'{summary_dir}/mvpa_summary{suf}.csv', index = False)
@@ -311,13 +320,13 @@ def calc_summary_mvpa():
 
 #copy_rois()
 #extract_acts()
-sort_by_functional()
+#sort_by_functional()
 
-calc_within_between()
+#calc_within_between()
 calc_summary_mvpa()
 
 
-create_combined_rdm()
+#create_combined_rdm()
 
 
 
