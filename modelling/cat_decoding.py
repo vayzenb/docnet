@@ -23,7 +23,7 @@ subj_list=["docnet2001", "docnet2003","docnet2004", "docnet2005", "docnet2007","
 d_roi = ['LOC','PPC_spaceloc', 'APC_spaceloc', 'PPC_depthloc', 'APC_depthloc', 'PPC_distloc',  'APC_distloc', 'PPC_toolloc', 'APC_toolloc']
 v_roi = ['LO_toolloc', 'PFS_toolloc']
 
-svm_test_size = .2
+svm_test_size = .4
 svm_splits = 20
 
 exp_cond = [ 'boat_1', 'boat_2', 'boat_3', 'boat_4', 'boat_5',
@@ -210,5 +210,5 @@ def decode_combined_roi():
             #for rr in d_roi:
 
 
-#decode_single_roi()
+decode_single_roi()
 decode_combined_roi()
