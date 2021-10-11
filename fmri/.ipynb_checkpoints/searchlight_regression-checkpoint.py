@@ -124,7 +124,7 @@ affine = all_nii[0].affine #get affine transforms
 group_img = mean_img(all_nii)
 zstat= math_img("(img-np.mean(img))/np.std(img)", img = group_img)
 
-#find fdr-corrected threshold
+#find fdr-corrected thresholdd
 thresh_val = threshold_stats_img(zstat,alpha=alpha, height_control='fdr', cluster_threshold = 5, two_sided = False)
 thresh_img = threshold_img(zstat, thresh_val[1])
 thresh_img = get_data(thresh_img)
