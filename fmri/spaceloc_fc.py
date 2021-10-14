@@ -118,12 +118,12 @@ def extract_roi_sphere(img, coords):
     seed_time_series = roi_masker.fit_transform(img)
     
     phys = np.mean(seed_time_series, axis= 1)
-    phys = (phys - np.mean(phys)) / np.std(phys) #TRY WITHOUT STANDARDIZING AT SOME POINT
+    #phys = (phys - np.mean(phys)) / np.std(phys) #TRY WITHOUT STANDARDIZING AT SOME POINT
     phys = phys.reshape((phys.shape[0],1))
     
     return phys
 
-
+"""
 def load_filtered_func(run):
     curr_img = image.load_img(f'{exp_dir}/run-0{run}/1stLevel.feat/filtered_func_data_reg.nii.gz')
     #curr_img = image.clean_img(curr_img,standardize=True, t_r=1)
@@ -138,7 +138,7 @@ def load_filtered_func(run):
     phys = phys.reshape((phys.shape[0],1))
     
     return img4d, phys
-
+"""
     
 def make_psy_cov_1(run,ss):
     sub_dir = f'{study_dir}/sub-{study}{ss}/ses-01/'
@@ -220,7 +220,9 @@ def conduct_ppi():
                     filtered_list = []
                     for rn in rc:
                         
-                        filtered_list.append(image.load_img(f'{exp_dir}/run-0{rn}/1stLevel.feat/filtered_func_data_reg.nii.gz'))
+                        curr_run = image.load_img(f'{exp_dir}/run-0{rn}/1stLevel.feat/filtered_func_data_reg.nii.gz')
+                        curr_run = image.clean_img(curr_run,standardize=True)
+                        filtered_list.append(curr_run)
                         
                     img4d = image.concat_imgs(filtered_list)
                     phys = extract_roi_sphere(img4d,curr_coords[['x','y','z']].values.tolist()[0])
@@ -261,6 +263,7 @@ def create_summary():
     """
     ventral_rois = ['LO_toolloc', 'PFS_toolloc']
     rois = ["PPC_spaceloc", "PPC_distloc", "PPC_toolloc"]
+    rois = ["APC_spaceloc", "APC_distloc", "APC_toolloc"]
 
     #For each ventral ROI
     for lrv in ['l','r']:
@@ -309,8 +312,8 @@ def create_summary():
 #                    print(ss, roi)
 
 
-#conduct_ppi()
-extract_roi_coords()
+conduct_ppi()
+#extract_roi_coords()
 #make_psy_cov(1001,[1,2])
 
 
