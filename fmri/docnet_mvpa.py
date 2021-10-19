@@ -18,9 +18,8 @@ sub info
 '''
 study ='docnet'
 study_dir = f"/lab_data/behrmannlab/vlad/{study}"
-subj_list=["docnet2001", "docnet2002","docnet2003","docnet2004", "docnet2005", "docnet2007","docnet2008", "docnet2012"]
-subj_list=["docnet2001", "docnet2003","docnet2004", "docnet2005", "docnet2008", "docnet2012"]
-#subj_list=["docnet2004"]
+subj_list=["docnet2001", "docnet2002","docnet2003","docnet2004", "docnet2005", "docnet2007",
+"docnet2008", "docnet2012","docnet2013", "docnet2014", "docnet2015", "docnet2016"]
 
  #runs to pull ROIs from
 rois = ["LO_toolloc", 'PFS_toolloc', 'PPC_spaceloc', 'APC_spaceloc', 'PPC_depthloc', 'PPC_distloc', 'APC_depthloc', 'APC_distloc', 'PPC_toolloc', 'APC_toolloc']
@@ -322,11 +321,11 @@ def calc_summary_mvpa():
 #extract_acts()
 #sort_by_functional()
 
-#calc_within_between()
+calc_within_between()
 calc_summary_mvpa()
 
 
-#create_combined_rdm()
+create_combined_rdm()
 
 
 

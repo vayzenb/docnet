@@ -15,9 +15,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 import pandas as pd
 
-#subj_list=["docnet2001", "docnet2002","docnet2003","docnet2005", "docnet2007","docnet2008", "docnet2012"]
-subj_list=["docnet2001", "docnet2002","docnet2003","docnet2004", "docnet2005", "docnet2007","docnet2008", "docnet2012"]
-subj_list=["docnet2001", "docnet2003","docnet2004", "docnet2005", "docnet2007","docnet2008", "docnet2012"]
+
+
+subj_list=["docnet2001", "docnet2002","docnet2003","docnet2004", "docnet2005", "docnet2007",
+"docnet2008", "docnet2012","docnet2013", "docnet2014", "docnet2015", "docnet2016"]
 
 #anatomical ROI
 d_roi = ['LOC','PPC_spaceloc', 'APC_spaceloc', 'PPC_depthloc', 'APC_depthloc', 'PPC_distloc',  'APC_distloc', 'PPC_toolloc', 'APC_toolloc']
@@ -105,7 +106,7 @@ def decode_single_roi():
                     #print(f'{roi_dir}/{lr}{rr}.nii.gz')
                   
         summary_df = summary_df.append(pd.Series([ss] + roi_decode, index = summary_df.columns), ignore_index= True)
-        summary_df.to_csv(f'decoding_summary_single_roi.csv', index = False)
+        summary_df.to_csv(f'results/decoding_summary_single_roi.csv', index = False)
                 
 
 
@@ -200,7 +201,7 @@ def decode_combined_roi():
         #pdb.set_trace()
         #append final data to summary
         summary_df = summary_df.append(pd.Series([ss] + roi_decode, index = summary_df.columns), ignore_index= True)
-        summary_df.to_csv(f'decoding_summary_combined_roi.csv', index = False)
+        summary_df.to_csv(f'results/decoding_summary_combined_roi.csv', index = False)
 
 
 

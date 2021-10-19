@@ -38,8 +38,7 @@ vols = 321
 whole_brain_mask = load_mni152_brain_mask()
 mni = load_mni152_template()
 brain_masker = input_data.NiftiMasker(whole_brain_mask,
-    smoothing_fwhm=0, standardize=True,
-    memory='nilearn_cache', memory_level=1, verbose=0)
+    smoothing_fwhm=0, standardize=True)
 
 '''run info'''
 run_num =6
@@ -138,33 +137,7 @@ def load_filtered_func(run):
     phys = phys.reshape((phys.shape[0],1))
     
     return img4d, phys
-"""
-    
-def make_psy_cov_1(run,ss):
-    sub_dir = f'{study_dir}/sub-{study}{ss}/ses-01/'
-    cov_dir = f'{sub_dir}/covs'
-    times = np.arange(0, vols, tr)
-    curr_cov = pd.read_csv(f'{cov_dir}/SpaceLoc_{study}{ss}_Run{run}_SA.txt', sep = '\t', header = None, names = ['onset','duration', 'value'])
-    #contrasting (neg) cov
-    curr_cont = pd.read_csv(f'{cov_dir}/SpaceLoc_{study}{ss}_Run{run}_FT.txt', sep = '\t', header =None, names =['onset','duration', 'value'])
-    curr_cont.iloc[:,2] = curr_cont.iloc[:,2] *-1 #make contrasting cov neg
-    
-    curr_cov = curr_cov.append(curr_cont) #append to positive
-    #add number of vols to the timing cols based on what run you are on
-    #e.g., for run 1, add 0, for run 2, add 321
-    #curr_cov['onset'] = curr_cov['onset'] + ((rn_n)*vols) 
-    #pdb.set_trace()
-    cov = curr_cov
-    #append to concatenated cov
-    
-    curr_cov = curr_cov.to_numpy()
-    
-    #convolve to hrf
-    psy, name = glm.first_level.compute_regressor(curr_cov.T, 'spm', times)
-    
-
-    return psy
-    
+"""    
 
 def make_psy_cov(runs,ss):
     sub_dir = f'{study_dir}/sub-{study}{ss}/ses-01/'
@@ -212,7 +185,7 @@ def conduct_ppi():
         roi_coords = pd.read_csv(f'{roi_dir}/spheres/sphere_coords.csv')
 
         for tsk in ['spaceloc','distloc', 'toolloc']:
-            for rr in ['rPPC']:
+            for rr in ['lPPC','lAPC']:
                 all_runs = [] #this will get filled with the data from each run
                 for rcn, rc in enumerate(run_combos): #determine which runs to use for creating ROIs
                     curr_coords = roi_coords[(roi_coords['index'] == rcn) & (roi_coords['task'] ==tsk) & (roi_coords['roi'] ==rr)]
@@ -286,7 +259,7 @@ def create_summary():
                     roi_mean = []
                     roi_mean.append(ss)
                     #For each dorsal ROI
-                    for lr in ['r']:
+                    for lr in ['l','r']:
                         for rr in rois:
                             roi = f'{lr}{rr}'
                             #if os.path.exists(f'{roi_dir}/{roi}_peak.nii.gz'):
