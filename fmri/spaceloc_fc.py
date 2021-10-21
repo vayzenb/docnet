@@ -20,6 +20,7 @@ warnings.filterwarnings('ignore')
 
 '''exp info'''
 subs = list(range(1001,1013))
+
 #subs = list(range(1012,1005, -1))
 #subs = list(range(1001,1006))
 print(subs)
