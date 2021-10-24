@@ -20,6 +20,7 @@ study ='docnet'
 study_dir = f"/lab_data/behrmannlab/vlad/{study}"
 subj_list=["docnet2001", "docnet2002","docnet2003","docnet2004", "docnet2005", "docnet2007",
 "docnet2008", "docnet2012","docnet2013", "docnet2014", "docnet2015", "docnet2016"]
+subj_list=["docnet2013", "docnet2014", "docnet2015", "docnet2016"]
 
  #runs to pull ROIs from
 rois = ["LO_toolloc", 'PFS_toolloc', 'PPC_spaceloc', 'APC_spaceloc', 'PPC_depthloc', 'PPC_distloc', 'APC_depthloc', 'APC_distloc', 'PPC_toolloc', 'APC_toolloc']
@@ -52,7 +53,7 @@ def copy_rois():
     
     for ss in subj_list:
         print(ss)
-        space_rois = f'{spaceloc_dir}/sub-spaceloc10{ss[-2:]}/ses-01/derivatives/rois'
+        space_rois = f'{spaceloc_dir}/sub-spaceloc20{ss[-2:]}/ses-01/derivatives/rois'
         sub_rois = f'{study_dir}/sub-{ss}/ses-02/derivatives/'
         bash_cmd = f'rsync -aP {space_rois} {sub_rois}'
         subprocess.run(bash_cmd.split(),check=True, capture_output=True, text=True)
@@ -317,15 +318,15 @@ def calc_summary_mvpa():
 
 
 
-#copy_rois()
+copy_rois()
 #extract_acts()
 #sort_by_functional()
 
-calc_within_between()
-calc_summary_mvpa()
+#calc_within_between()
+#calc_summary_mvpa()
 
 
-create_combined_rdm()
+#create_combined_rdm()
 
 
 
