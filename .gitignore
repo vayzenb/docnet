@@ -1,2 +1,4 @@
 modelling/weights/
 nilearn_cache/
+*.nii.gz
+slurm_out/
