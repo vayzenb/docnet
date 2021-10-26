@@ -5,16 +5,14 @@ import time
 import pdb
 
 job_name = 'MVPD_searchlight'
-mem = 36
-run_time = "1-00:00:00"
+mem = 48
+run_time = "2-00:00:00"
 
 #subj info
 subj_list = [2001,2002,2003,2004, 2005, 2007, 2008, 2012, 2013, 2014, 2015, 2016]
 
-seed_rois = ['PPC_spaceloc',  'PPC_toolloc','PPC_distloc', 'APC_spaceloc',  'APC_toolloc','APC_distloc']
+seed_rois = ['rPPC_spaceloc','lAPC_distloc']
 
-subj_list=[2001]
-seed_rois = ['PPC_spaceloc']
 
 study_dir = f'/user_data/vayzenbe/GitHub_Repos/docnet'
 
@@ -31,11 +29,9 @@ def move_files(cl):
 def setup_sbatch(ss, rr):
     sbatch_setup = f"""#!/bin/bash -l
 
-module load anaconda3
-conda activate brainiak
 
 # Job name
-#SBATCH --job-name={job_name}__{ss}_{rr}
+#SBATCH --job-name={job_name}_{ss}_{rr}
 
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=vayzenb@cmu.edu
@@ -55,6 +51,9 @@ conda activate brainiak
 # Standard output and error log
 #SBATCH --output={study_dir}/slurm_out/{job_name}_{ss}_{rr}.out
 
+module load anaconda3
+conda activate brainiak
+
 """
     return sbatch_setup
 
@@ -69,9 +68,14 @@ rm -rf /scratch/vayzenbe/
 job_file = f"{job_name}.sh"
 
 for ss in subj_list:
-    for lr in ['r']:
-        for rr in seed_rois:
-            job_cmd = f'python docnet_mvpd.py {ss} {lr}{rr}'
+    sub_dir = f'/lab_data/behrmannlab/vlad/docnet/sub-docnet{ss}/ses-02/'
+    roi_dir = f'{sub_dir}/derivatives/rois'
+    for rr in seed_rois:
+        #print(ss, f'{roi_dir}/{rr}.nii.gz')
+        if os.path.exists(f'{roi_dir}/{rr}.nii.gz'):
+            print(ss, rr)
+            #os.remove(f"{job_name}.sh")
+            job_cmd = f'python {study_dir}/fmri/docnet_mvpd.py {ss} {rr}'
             f = open(f"{job_name}.sh", "a")
             f.writelines(setup_sbatch(ss,rr))
             f.writelines(job_cmd)
