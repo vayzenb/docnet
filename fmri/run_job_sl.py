@@ -5,13 +5,15 @@ import time
 import pdb
 
 job_name = 'MVPD_searchlight'
-mem = 48
+mem = 36
 run_time = "2-00:00:00"
 
 #subj info
 subj_list = [2001,2002,2003,2004, 2005, 2007, 2008, 2012, 2013, 2014, 2015, 2016]
+subj_list = list(range(1001, 1013))
 
-seed_rois = ['rPPC_spaceloc','lAPC_distloc']
+seed_rois = ['lPPC_spaceloc','lAPC_spaceloc']
+
 
 
 study_dir = f'/user_data/vayzenbe/GitHub_Repos/docnet'
@@ -37,10 +39,10 @@ def setup_sbatch(ss, rr):
 #SBATCH --mail-user=vayzenb@cmu.edu
 
 # Submit job to cpu queue                
-#SBATCH -p gpu
+#SBATCH -p cpu
 
 #SBATCH --cpus-per-task=6
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:0
 #SBATCH --exclude=mind-1-1,mind-1-3,mind-1-5,mind-1-26,mind-1-32 
 # Job memory request
 #SBATCH --mem={mem}gb
