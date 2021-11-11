@@ -23,12 +23,12 @@ subj_list=["docnet2001", "docnet2002","docnet2003","docnet2004", "docnet2005", "
 subj_list=["docnet2013", "docnet2014", "docnet2015", "docnet2016"]
 
  #runs to pull ROIs from
-rois = ["LO_toolloc", 'PFS_toolloc', 'PPC_spaceloc', 'APC_spaceloc', 'PPC_depthloc', 'PPC_distloc', 'APC_depthloc', 'APC_distloc', 'PPC_toolloc', 'APC_toolloc']
+rois = ["LO_toolloc", 'PPC_spaceloc', 'APC_spaceloc',  'APC_distloc', 'PPC_toolloc', 'APC_toolloc']
 
 
 exp = 'catmvpa' #experimental tasks
 
-exp_suf = ["", "_odd", "_even"]
+
 exp_suf = [""]
 
 
