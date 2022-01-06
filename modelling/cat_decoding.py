@@ -37,6 +37,7 @@ exp_cats = ['boat', 'camera',' car', 'guitar','lamp']
 
 #create a list of labels for classification
 exp_labels = np.concatenate((np.ones((1,5)),np.ones((1,5))*2, np.ones((1,5))*3, np.ones((1,5))*4, np.ones((1,5))*5),axis =1)[0]
+pdb.set_trace()
 
 data_dir = 'derivatives/results/beta/catmvpa'
 

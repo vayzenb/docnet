@@ -5,6 +5,10 @@ import os
 import pdb
 
 
+"""
+assorted useful functions for analyzing fmri dataset
+most functions use FSL commands 
+"""
 
 
 def extract_data(sub_dir, out_dir, roi, exp,cond_list, cope_list, suf='',stat_type='zstat1'):

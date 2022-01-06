@@ -1,3 +1,7 @@
+"""
+iteratively creates sbatch scripts to run multiple jobs at once the
+"""
+
 import subprocess
 from glob import glob
 import os
