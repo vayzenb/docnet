@@ -18,8 +18,8 @@ warnings.filterwarnings('ignore')
 subs = list(range(1001,1013))
 #subs = list(range(1003,1013))
 
-subs = list(range(1012,1005, -1))
-#subs = list(range(1001,1006))
+#subs = list(range(1012,1005, -1))
+subs = list(range(1001,1006))
 print(subs)
 study ='spaceloc'
 study_dir = f"/lab_data/behrmannlab/vlad/{study}"
@@ -60,15 +60,21 @@ def extract_roi_sphere(img, coords):
     return phys
 
 
-def make_psy_cov(runs,ss, cond):
+def make_psy_cov(runs,ss):
     sub_dir = f'{study_dir}/sub-{study}{ss}/ses-01/'
     cov_dir = f'{sub_dir}/covs'
     times = np.arange(0, vols*len(runs), tr)
     full_cov = pd.DataFrame(columns = ['onset','duration', 'value'])
     for rn, run in enumerate(runs):    
         
-        curr_cov = pd.read_csv(f'{cov_dir}/SpaceLoc_{study}{ss}_Run{run}_{cond}.txt', sep = '\t', header = None, names = ['onset','duration', 'value'])
+        curr_cov = pd.read_csv(f'{cov_dir}/SpaceLoc_{study}{ss}_Run{run}_SA.txt', sep = '\t', header = None, names = ['onset','duration', 'value'])
         #contrasting (neg) cov
+
+        curr_cont = pd.read_csv(f'{cov_dir}/SpaceLoc_{study}{ss}_Run{run}_FT.txt', sep = '\t', header =None, names =['onset','duration', 'value'])
+        curr_cont.iloc[:,2] = curr_cont.iloc[:,2] *-1 #make contrasting cov neg
+        
+        curr_cov = curr_cov.append(curr_cont) #append to positive
+
         curr_cov['onset'] = curr_cov['onset'] + (vols*rn)
         full_cov = full_cov.append(curr_cov)
         #add number of vols to the timing cols based on what run you are on
@@ -79,11 +85,10 @@ def make_psy_cov(runs,ss, cond):
         #append to concatenated cov
     full_cov = full_cov.sort_values(by =['onset'])
     cov = full_cov.to_numpy()
-    cov = cov.astype(float)
+
     #convolve to hrf
     psy, name = glm.first_level.compute_regressor(cov.T, 'spm', times)
-    psy[psy>0] = 1
-    psy[psy<=0] = 0
+        
 
     return psy
 
@@ -107,12 +112,14 @@ def extract_cond_ts(ts, cov):
 #rr = 'rPPC_spaceloc'
 def conduct_gca():
     tasks = ['spaceloc','distloc']
+    #tasks = ['spaceloc']
     cond = ['SA','FT']
-    
+
     d_rois = ['lPPC','rPPC','lAPC','rAPC']
+    #d_rois = ['rPPC','rAPC']
     v_rois = ['lLO','rLO']
     for ss in subs:
-        sub_summary =pd.DataFrame(columns = ['sub','fold','task','condition','origin','target', 'f_diff'])
+        sub_summary =pd.DataFrame(columns = ['sub','fold','task','origin','target', 'f_diff'])
         
         sub_dir = f'{study_dir}/sub-{study}{ss}/ses-01/'
         cov_dir = f'{sub_dir}/covs'
@@ -137,51 +144,51 @@ def conduct_gca():
             print(ss,rcn,'loaded')
 
             for tsk in tasks:
+                #load behavioral data
+                #time adjusted using HRF to pull out boxcar
+                psy = make_psy_cov(rc, ss)
                 for drr in d_rois:
                     
                     #load peak voxel in dorsal roi
                     dorsal_coords = roi_coords[(roi_coords['index'] == rcn) & (roi_coords['task'] ==tsk) & (roi_coords['roi'] ==drr)]
                     #Extract TS from dorsal roi
                     dorsal_ts = extract_roi_sphere(img4d,dorsal_coords[['x','y','z']].values.tolist()[0])
+            
+
+                    #create dorsal ts for just that condition
+                    dorsal_phys = dorsal_ts * psy
                     
-                
-                    for cc in cond:
-                        #load behavioral data
-                        #time adjusted using HRF to pull out boxcar
-                        psy = make_psy_cov(rc, ss,cc)
-
-                        #create dorsal ts for just that condition
-                        dorsal_phys = extract_cond_ts(dorsal_ts, psy)
+                    for vrr in v_rois:
                         
-                        for vrr in v_rois:
-                            
-                            ventral_coords = roi_coords[(roi_coords['index'] == rcn) & (roi_coords['task'] =='toolloc') & (roi_coords['roi'] ==vrr)]
-                            ventral_ts = extract_roi_sphere(img4d,ventral_coords[['x','y','z']].values.tolist()[0])
-                            ventral_phys = extract_cond_ts(ventral_ts, psy)                            
-
-                            #Add TSs to a dataframe to prep for gca
-                            neural_ts= pd.DataFrame(columns = ['dorsal', 'ventral'])
-                            neural_ts['dorsal'] = np.squeeze(dorsal_phys)
-                            neural_ts['ventral'] = np.squeeze(ventral_phys)
-                            
-                            #calculate dorsal GCA F-test
-                            gc_res_dorsal = grangercausalitytests(neural_ts[['ventral','dorsal']], 1, verbose=False)
-                            
-                            #calculate ventral GCA F-test
-                            gc_res_ventral = grangercausalitytests(neural_ts[['dorsal','ventral']], 1,verbose=False)
-
-                            #calc difference
-                            f_diff = gc_res_dorsal[1][0]['ssr_ftest'][0]-gc_res_ventral[1][0]['ssr_ftest'][0]
-
-                            curr_data = pd.Series([ss, rcn,tsk, cc, drr, vrr, f_diff], index=sub_summary.columns)
-                            
-                            
-                            sub_summary = sub_summary.append(curr_data,ignore_index=True)
-                            print(ss, tsk,cc, drr,vrr)
-
+                        ventral_coords = roi_coords[(roi_coords['index'] == rcn) & (roi_coords['task'] =='toolloc') & (roi_coords['roi'] ==vrr)]
+                        ventral_ts = extract_roi_sphere(img4d,ventral_coords[['x','y','z']].values.tolist()[0])
+                        ventral_phys = ventral_ts*psy
+                                                    
+                        # %%
+                        #Add TSs to a dataframe to prep for gca
+                        neural_ts= pd.DataFrame(columns = ['dorsal', 'ventral'])
+                        neural_ts['dorsal'] = np.squeeze(dorsal_phys)
+                        neural_ts['ventral'] = np.squeeze(ventral_phys)
                         
+                        #pdb.set_trace()
+                        #calculate dorsal GCA F-test
+                        gc_res_dorsal = grangercausalitytests(neural_ts[['ventral','dorsal']], 1, verbose=False)
+                        
+                        #calculate ventral GCA F-test
+                        gc_res_ventral = grangercausalitytests(neural_ts[['dorsal','ventral']], 1,verbose=False)
+
+                        #calc difference
+                        f_diff = gc_res_dorsal[1][0]['ssr_ftest'][0]-gc_res_ventral[1][0]['ssr_ftest'][0]
+
+                        curr_data = pd.Series([ss, rcn,tsk, drr, vrr, f_diff], index=sub_summary.columns)
+                        
+                        
+                        sub_summary = sub_summary.append(curr_data,ignore_index=True)
+                        print(ss, tsk,drr,vrr)
+
+                    
         print('done GCA for', ss)                
-        sub_summary.to_csv(f'{sub_dir}/derivatives/results/beta_ts/gca_summary.csv',index=False)
+        sub_summary.to_csv(f'{sub_dir}/derivatives/results/beta_ts/gca_summary_ppi.csv',index=False)
 
 
 conduct_gca()
