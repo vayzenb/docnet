@@ -177,8 +177,50 @@ def conduct_gca():
         print('done GCA for', ss)                
         sub_summary.to_csv(f'{sub_dir}/derivatives/results/beta_ts/gca_summary_full_ts.csv',index=False)
 
+def summarize_gca():
+    """
+    Compile subject data into one summary
+    """
+    print('Creating summary across subjects...')
+    subs = list(range(1001,1013))
+    
+    df_summary = pd.DataFrame()
+    tasks = ['spaceloc', 'distloc']
+    cond = ['SA','FT']
 
-conduct_gca()
+    d_rois = ['lPPC','rPPC','lAPC','rAPC']
+    #d_rois = ['rPPC','rAPC']
+    v_rois = ['lLO','rLO']
+    for ss in subs:
+        sub_dir = f'{study_dir}/sub-{study}{ss}/ses-01/'
+        data_dir = f'{sub_dir}/derivatives/results/beta_ts'
+
+        curr_df = pd.read_csv(f'{data_dir}/gca_summary.csv')
+        #pdb.set_trace()
+        curr_df = curr_df.groupby(['task', 'origin','target']).mean()
+        curr_data = [ss]
+        col_index = ['sub']
+        for tsk in tasks:
+        
+            for drr in d_rois:
+                for vrr in v_rois:
+
+                    #for dorsal origin
+                    col_index.append(f'{tsk}_{drr}_{vrr}')
+                    curr_data.append(curr_df['f_diff'][tsk, drr, vrr])
+                    
+
+        if ss == 1001:
+            df_summary = pd.DataFrame(columns=col_index)
+            df_summary = df_summary.append(pd.Series(curr_data,index = col_index),ignore_index=True)
+        else:
+            df_summary = df_summary.append(pd.Series(curr_data,index = col_index),ignore_index=True)
+
+    df_summary.to_csv(f"{results_dir}/gca/gca_summary_full_ts.csv", index = False)
+
+
+#conduct_gca()
+summarize_gca()
 
 
 

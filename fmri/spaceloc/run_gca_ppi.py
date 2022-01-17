@@ -1,3 +1,4 @@
+# %%
 import os
 import pandas as pd
 from nilearn import image, plotting, input_data, glm
@@ -18,8 +19,8 @@ warnings.filterwarnings('ignore')
 subs = list(range(1001,1013))
 #subs = list(range(1003,1013))
 
-#subs = list(range(1012,1005, -1))
-subs = list(range(1001,1006))
+subs = list(range(1012,1005, -1))
+#subs = list(range(1001,1006))
 print(subs)
 study ='spaceloc'
 study_dir = f"/lab_data/behrmannlab/vlad/{study}"
@@ -110,7 +111,11 @@ def extract_cond_ts(ts, cov):
 
 #ss = 1001
 #rr = 'rPPC_spaceloc'
+
+# %%
 def conduct_gca():
+    
+    # %%
     tasks = ['spaceloc','distloc']
     #tasks = ['spaceloc']
     cond = ['SA','FT']
@@ -163,19 +168,21 @@ def conduct_gca():
                         ventral_coords = roi_coords[(roi_coords['index'] == rcn) & (roi_coords['task'] =='toolloc') & (roi_coords['roi'] ==vrr)]
                         ventral_ts = extract_roi_sphere(img4d,ventral_coords[['x','y','z']].values.tolist()[0])
                         ventral_phys = ventral_ts*psy
-                                                    
+                                   
                         # %%
                         #Add TSs to a dataframe to prep for gca
                         neural_ts= pd.DataFrame(columns = ['dorsal', 'ventral'])
-                        neural_ts['dorsal'] = np.squeeze(dorsal_phys)
-                        neural_ts['ventral'] = np.squeeze(ventral_phys)
+                        neural_ts['dorsal_psy'] = np.squeeze(dorsal_phys)
+                        neural_ts['ventral_psy'] = np.squeeze(ventral_phys)
+                        neural_ts['dorsal'] = np.squeeze(dorsal_ts)
+                        neural_ts['ventral'] = np.squeeze(ventral_ts)
                         
                         #pdb.set_trace()
                         #calculate dorsal GCA F-test
-                        gc_res_dorsal = grangercausalitytests(neural_ts[['ventral','dorsal']], 1, verbose=False)
+                        gc_res_dorsal = grangercausalitytests(neural_ts[['ventral','dorsal_psy']], 1, verbose=False)
                         
                         #calculate ventral GCA F-test
-                        gc_res_ventral = grangercausalitytests(neural_ts[['dorsal','ventral']], 1,verbose=False)
+                        gc_res_ventral = grangercausalitytests(neural_ts[['dorsal','ventral_psy']], 1,verbose=False)
 
                         #calc difference
                         f_diff = gc_res_dorsal[1][0]['ssr_ftest'][0]-gc_res_ventral[1][0]['ssr_ftest'][0]
