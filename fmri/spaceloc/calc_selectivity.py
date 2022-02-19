@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(0, '/user_data/vayzenbe/GitHub_Repos/docnet/fmri')
 import fmri_funcs
 import numpy as np
 import pandas as pd
@@ -13,15 +15,17 @@ from scipy import stats
 warnings.filterwarnings('ignore')
 import matplotlib
 matplotlib.use('Agg')
+file_suf = '_supp'
 
 
 
 study ='spaceloc'
 
 subj_list=["spaceloc1001", "spaceloc1002", "spaceloc1003", "spaceloc1004", "spaceloc1005", "spaceloc1006", "spaceloc1007",
-"spaceloc1008" ,"spaceloc1009", "spaceloc1010", "spaceloc1011" ,"spaceloc1012" ]
+"spaceloc1008" ,"spaceloc1009", "spaceloc1010", "spaceloc1011" ,"spaceloc1012", 
+"spaceloc2013", "spaceloc2014", "spaceloc2015" , "spaceloc2016" , "spaceloc2017" , "spaceloc2018"]
 
-
+#subj_list=["spaceloc2017" , "spaceloc2018"]
 
 loc_suf = "_spaceloc" #runs to pull ROIs from
 exp = ['spaceloc','depthloc','distloc','toolloc'] #experimental tasks
@@ -39,7 +43,7 @@ cond = [['space','feature'], ['3D',"2D"], ['distance', 'luminance'], ['tool','no
 cond_names = list(itertools.chain(*cond))
 #cond = [['space_loc','feature_loc'], ['3D_loc',"2D_loc"], ['distance_loc', 'luminance_loc'], ['tool_loc','non_tool_loc']]
 
-rois = ["LO_toolloc", 'PFS_toolloc', 'PPC_spaceloc', 'APC_spaceloc']
+rois = ["LO_toolloc",  'PPC_spaceloc', 'APC_spaceloc']
 
 
 bool_extract_data = True
@@ -317,8 +321,8 @@ def group_summaries(data_type):
             df_mean = pd.DataFrame(np.mean(np.array(all_subs), axis =0), columns=cond_names)
             df_se = pd.DataFrame(stats.sem(np.array(all_subs), axis =0), columns=cond_names)
 
-            df_mean.to_csv(f'{study_dir}/derivatives/results/{roi}_mean_{data_type}.csv', index = False)
-            df_se.to_csv(f'{study_dir}/derivatives/results/{roi}_se_{data_type}.csv', index = False)
+            df_mean.to_csv(f'{study_dir}/derivatives/results/{roi}_mean_{data_type}{file_suf}.csv', index = False)
+            df_se.to_csv(f'{study_dir}/derivatives/results/{roi}_se_{data_type}{file_suf}.csv', index = False)
             
             #plot_vsf(f'{study_dir}/derivatives/', df_mean,  roi, cond_names, data_type, True, data_type)
 #            pdb.set_trace()
@@ -334,15 +338,17 @@ def group_summaries(data_type):
 
 
 
-
-#extract_acts()
+subj_list = ["spaceloc2013", "spaceloc2014", "spaceloc2015" , "spaceloc2016" , "spaceloc2017" , "spaceloc2018"]
+extract_acts()
 calc_selectivity()
-calc_mvpa()
+#calc_mvpa()
 
 
-
+subj_list=["spaceloc1001", "spaceloc1002", "spaceloc1003", "spaceloc1004", "spaceloc1005", "spaceloc1006", "spaceloc1007",
+"spaceloc1008" ,"spaceloc1009", "spaceloc1010", "spaceloc1011" ,"spaceloc1012", 
+"spaceloc2013", "spaceloc2014", "spaceloc2015" , "spaceloc2016" , "spaceloc2017" , "spaceloc2018"]
 group_summaries('activations')
-group_summaries('correlations')
+#group_summaries('correlations')
 
 
 

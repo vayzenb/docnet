@@ -1,4 +1,5 @@
-
+import sys
+sys.path.insert(0, '/user_data/vayzenbe/GitHub_Repos/docnet/fmri')
 import pandas as pd
 from nilearn import image, plotting, input_data, glm
 #from nilearn.glm import threshold_stats_img
@@ -20,7 +21,8 @@ warnings.filterwarnings('ignore')
 
 '''exp info'''
 subs = list(range(1001,1013))
-
+subs = subs + list(range(2013,2019))
+print(subs)
 #subs = list(range(1012,1005, -1))
 #subs = list(range(1001,1006))
 print(subs)
@@ -31,6 +33,7 @@ results_dir = '/user_data/vayzenbe/GitHub_Repos/docnet/results'
 exp = 'spaceloc'
 rois = ['PPC_spaceloc', 'APC_spaceloc', 'PPC_depthloc', 'APC_depthloc', 'PPC_toolloc', 'APC_toolloc', 'PPC_distloc', 'APC_distloc']
 control_tasks = ['distloc','toolloc','depthloc']
+file_suf = '_supp'
 
 '''scan params'''
 tr = 1
@@ -275,7 +278,7 @@ def create_summary():
                 
                 summary_df = summary_df.append(pd.Series(roi_mean, index = summary_df.columns), ignore_index = True)
         print(ventral)
-        summary_df.to_csv(f'{results_dir}/{ventral}_fc.csv', index=False)
+        summary_df.to_csv(f'{results_dir}/{ventral}_fc{file_suf}.csv', index=False)
         summary_df.iloc[:, 1:].mean().plot.bar()
         plt.pause(0.0001)
                 
@@ -285,9 +288,11 @@ def create_summary():
 
 #                    print(ss, roi)
 
-
+subs = list(range(2013,2019))
+extract_roi_coords()
 conduct_ppi()
-#extract_roi_coords()
+subs = list(range(1001,1013)) + list(range(2013,2019))
+create_summary()
 #make_psy_cov(1001,[1,2])
 
 

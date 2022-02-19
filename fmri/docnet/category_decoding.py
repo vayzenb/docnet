@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(0, '/user_data/vayzenbe/GitHub_Repos/docnet/fmri')
 import numpy as np
 import pandas as pd
 import subprocess
