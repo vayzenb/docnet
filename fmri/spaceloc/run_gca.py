@@ -28,7 +28,7 @@ results_dir = '/user_data/vayzenbe/GitHub_Repos/docnet/results'
 exp = 'spaceloc'
 rois = ['PPC_spaceloc', 'APC_spaceloc', 'PPC_depthloc', 'APC_depthloc', 'PPC_toolloc', 'APC_toolloc', 'PPC_distloc', 'APC_distloc']
 control_tasks = ['distloc','toolloc','depthloc']
-
+file_suf  = '_supp'
 '''scan params'''
 tr = 1
 vols = 321
@@ -223,8 +223,11 @@ def summarize_gca():
         else:
             df_summary = df_summary.append(pd.Series(curr_data,index = col_index),ignore_index=True)
 
-    df_summary.to_csv(f"{results_dir}/gca/all_roi_summary.csv", index = False)
-#conduct_gca()
+    df_summary.to_csv(f"{results_dir}/gca/all_roi_summary{file_suf}.csv", index = False)
+
+subs = list(range(2013,2019))
+conduct_gca()
+subs = list(range(1001,1013)) + list(range(2013,2019))
 summarize_gca()
 
 

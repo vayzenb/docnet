@@ -1,0 +1,15 @@
+Experiment 1 - analysis pipeline
+
+#pre-processing
+1. Run BIDS curation tool on FlyWheel
+2. Use FlyWheel to download data
+3. Run preprocessing to create derivative and cov directories, de-skull anat, create motion spike covs
+4. Run changeOut script to copy 1stlevel.fsf/HighLevel.fsf files to new subs.
+	a. Run once for with '_roi' suffix and once with no suffix '' to create 4-run localizer feats and 2-run experimental feats
+5. Copy over cov files
+6. Run parcel2anat to register parcels to individual subject space
+7. Run create_rois to create rois from contrasts + parcels
+8. Run 1stlevel2anat to register 1stlevel stat file to standard, to be used later for cross-val
+9. Run create_roi_sphere for create 6mm spherical ROIs centered on the peak
+
+#Experimental analysis

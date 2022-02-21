@@ -97,7 +97,7 @@ def extract_roi_coords():
                     masked_stat = image.get_data(masked_stat)
                     np_coords = np.where(masked_stat == np.max(masked_stat))
                     #pdb.set_trace()
-                    max_coord = image.coord_transform(np_coords,affine)
+                    #max_coord = image.coord_transform(np_coords,affine)
 
 
 
