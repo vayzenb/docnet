@@ -35,6 +35,7 @@ dorsal = str(sys.argv[2])
 
 print(ss, dorsal)
 # %%
+#setup directories
 study ='docnet'
 study_dir = f"/lab_data/behrmannlab/vlad/{study}"
 out_dir = f'{study_dir}/derivatives/fc'
@@ -47,19 +48,18 @@ roi_dir = f'{sub_dir}/derivatives/rois'
 exp_dir = f'{sub_dir}/derivatives/fsl/{exp}'
 
 runs = list(range(1,9))
-#runs = list(range(1,5))
 
-#whole_brain_mask = datasets.load_mni152_brain_mask()
 whole_brain_mask = image.load_img('/user_data/vayzenbe/GitHub_Repos/fmri/roiParcels/mruczek_parcels/binary/all_visual_areas.nii.gz')
 affine = whole_brain_mask.affine
 dimsize = whole_brain_mask.header.get_zooms()  #get dimenisions
 
-#
+# scan parameters
 vols = 331
 first_fix = 8
 
+# threshold for PCA
 pc_thresh = .9
-#clf = Ridge(normalize=True) #how to best to choose regularization term?
+
 clf = LinearRegression()
 #train/test split in 6 and 2 runs
 rs = ShuffleSplit(n_splits=5, test_size=.25, random_state=0)
@@ -69,16 +69,13 @@ Setup searchlight
 """
 print('Searchlight setup ...')
 #set search light params
-#data = bold_vol #data as 4D volume (in numpy)
-mask = image.get_data(whole_brain_mask) #the mask to search within
-#mask = np.zeros(whole_brain_mask.shape) + 1
-#mask = mask * image.get_data(whole_brain_mask)
 
-#mask = image.get_data(image.load_img(f'{roi_dir}/rLO_toolloc.nii.gz'))
+mask = image.get_data(whole_brain_mask) #the mask to search within
+
+
 sl_rad = 2 #radius of searchlight sphere (in voxels)
 max_blk_edge = 10 #how many blocks to send on each parallelized search
 pool_size = 1 #number of cores to work on each search
-#bcvar = model_df #any data you need to send to do the analysis in each sphere (sending seed_TS)
 
 voxels_proportion=1
 shape = Ball
@@ -127,7 +124,7 @@ def calc_pc_n(pca, thresh):
 # %%
 def calc_mvc(seed_train,seed_test, target_train, target_test, target_pc):
     """
-    Conduct ridge by iteratively fitting all seed PCs to target PCs
+    Conduct regression by iteratively fitting all seed PCs to target PCs
 
     seed_train,seed_test, target_train, target_test, target_pc
     """
@@ -146,10 +143,11 @@ def calc_mvc(seed_train,seed_test, target_train, target_test, target_pc):
 
 
 # %%
-"""
-Create timeseries mask (i.e., a list of value)  that correspond to training and test runs
-"""
+
 def create_ts_mask(train, test):
+    """
+    Create timeseries mask (i.e., a list of value)  that correspond to training and test runs
+    """
 
     train_index = []
     test_index = []
@@ -165,6 +163,9 @@ def create_ts_mask(train, test):
 
 # %%
 def mvpd(data, sl_mask, myrad, seed_ts):
+    """
+    Run multivaraite pattern dependance analysis
+    """
     
     # Pull out the data
     data4D = data[0]
@@ -212,9 +213,6 @@ def mvpd(data, sl_mask, myrad, seed_ts):
     return np.mean(mvc_list)     
 
 
-    #
-
-
 
 # %%
 def load_data():
@@ -249,7 +247,7 @@ def load_data():
 
     # %%
 def extract_seed_ts(bold_vol):
-    #extract all data from seed
+    #extract all data from seed region
 
     #load seed
     seed_roi = image.get_data(image.load_img(f'{roi_dir}/spheres/{dorsal}_sphere.nii.gz'))
