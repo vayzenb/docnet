@@ -53,11 +53,12 @@ for rn1 in range(1,run_num+1):
     for rn2 in range(rn1+1,run_num+1):
         run_combos.append([rn1,rn2])
 
+
 def extract_roi_coords():
     """
     Define ROIs
     """
-    parcels = ['PPC', 'APC']
+    parcels = ['PPC', 'APC',]
 
     for ss in subs:
         sub_dir = f'{study_dir}/sub-{study}{ss}/ses-01'
@@ -247,8 +248,8 @@ def create_summary():
         
         for vr in ventral_rois:
             
-            #summary_df = pd.DataFrame(columns = ['sub'] + ['l' + rr for rr in rois] + ['r' + rr for rr in rois])
-            summary_df = pd.DataFrame(columns = ['sub'] + ['r' + rr for rr in rois])
+            summary_df = pd.DataFrame(columns = ['sub'] + ['l' + rr for rr in rois] + ['r' + rr for rr in rois])
+            #summary_df = pd.DataFrame(columns = ['sub'] + ['r' + rr for rr in rois])
             ventral = f'{lrv}{vr}'
             print(ventral)
             for ss in subs:
@@ -272,15 +273,15 @@ def create_summary():
                             acts = ventral_mask.fit_transform(ppi_img)
 
                             
-                        roi_mean.append(acts.mean())
+                            roi_mean.append(acts.mean())
                         #else:
                         #    roi_mean.append(np.nan)
-                
+                #pdb.set_trace()
                 summary_df = summary_df.append(pd.Series(roi_mean, index = summary_df.columns), ignore_index = True)
-        print(ventral)
+        #print(ventral)
         summary_df.to_csv(f'{results_dir}/{ventral}_fc{file_suf}.csv', index=False)
-        summary_df.iloc[:, 1:].mean().plot.bar()
-        plt.pause(0.0001)
+        #summary_df.iloc[:, 1:].mean().plot.bar()
+        #plt.pause(0.0001)
                 
 
 
@@ -288,9 +289,9 @@ def create_summary():
 
 #                    print(ss, roi)
 
-subs = list(range(2013,2019))
-extract_roi_coords()
-conduct_ppi()
+#subs = list(range(2013,2019))
+#extract_roi_coords()
+#conduct_ppi()
 subs = list(range(1001,1013)) + list(range(2013,2019))
 create_summary()
 #make_psy_cov(1001,[1,2])

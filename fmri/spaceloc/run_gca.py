@@ -49,6 +49,39 @@ for rn1 in range(1,run_num+1):
 
 #run_combos = run_combos[0:2]
 
+def add_lo_coords(subs):
+    """
+    Add LO to the ROI coords file
+    """
+    print('extracting LOC coords...')
+    parcels = ['LO']
+
+    for ss in subs:
+        sub_dir = f'{study_dir}/sub-{study}{ss}/ses-01'
+        roi_dir = f'{sub_dir}/derivatives/rois'
+        exp_dir = f'{sub_dir}/derivatives/fsl'
+        parcel_dir = f'{roi_dir}/parcels'
+        roi_coords = pd.read_csv(f'{roi_dir}/spheres/sphere_coords.csv')
+        roi_coords = roi_coords[roi_coords['roi'] != 'lLO']
+        roi_coords = roi_coords[roi_coords['roi'] != 'rLO']
+        
+        
+        
+        for lr in ['l','r']:
+            for pr in parcels:
+                #load parcel
+                roi = image.load_img(f'{parcel_dir}/{lr}{pr}.nii.gz')
+                roi = image.math_img('img > 0', img=roi)
+
+                control_zstat = image.load_img(f'{exp_dir}/toolloc/HighLevel_roi.gfeat/cope5.feat/stats/zstat1.nii.gz')
+                coords = plotting.find_xyz_cut_coords(control_zstat,mask_img=roi, activation_threshold = .99)
+
+                for rn in range(0,15):
+                    curr_coords = pd.Series([rn, 'toolloc', f'{lr}{pr}'] + coords, index=roi_coords.columns)
+                    roi_coords = roi_coords.append(curr_coords,ignore_index = True)
+
+        roi_coords.to_csv(f'{roi_dir}/spheres/sphere_coords.csv', index=False)
+
 def extract_roi_sphere(img, coords):
     roi_masker = input_data.NiftiSpheresMasker([tuple(coords)], radius = 6)
     seed_time_series = roi_masker.fit_transform(img)
@@ -106,6 +139,8 @@ def extract_cond_ts(ts, cov):
 #ss = 1001
 #rr = 'rPPC_spaceloc'
 def conduct_gca():
+
+    print('Running GCA...')
     tasks = ['spaceloc','distloc']
     cond = ['SA','FT']
     
@@ -156,6 +191,7 @@ def conduct_gca():
                         for vrr in v_rois:
                             
                             ventral_coords = roi_coords[(roi_coords['index'] == rcn) & (roi_coords['task'] =='toolloc') & (roi_coords['roi'] ==vrr)]
+                            #pdb.set_trace()
                             ventral_ts = extract_roi_sphere(img4d,ventral_coords[['x','y','z']].values.tolist()[0])
                             ventral_phys = extract_cond_ts(ventral_ts, psy)                            
 
@@ -226,6 +262,7 @@ def summarize_gca():
     df_summary.to_csv(f"{results_dir}/gca/all_roi_summary{file_suf}.csv", index = False)
 
 subs = list(range(2013,2019))
+#add_lo_coords(subs)
 conduct_gca()
 subs = list(range(1001,1013)) + list(range(2013,2019))
 summarize_gca()
