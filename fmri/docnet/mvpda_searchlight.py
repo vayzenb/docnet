@@ -247,7 +247,9 @@ def load_data():
 
     # %%
 def extract_seed_ts(bold_vol):
-    #extract all data from seed region
+    """
+    extract all data from seed region
+    """
 
     #load seed
     seed_roi = image.get_data(image.load_img(f'{roi_dir}/spheres/{dorsal}_sphere.nii.gz'))

@@ -22,7 +22,7 @@ study ='docnet'
 study_dir = f"/lab_data/behrmannlab/vlad/{study}"
 subj_list=["docnet2001", "docnet2002","docnet2003","docnet2004", "docnet2005", "docnet2007",
 "docnet2008", "docnet2012","docnet2013", "docnet2014", "docnet2015", "docnet2016"]
-subj_list=["docnet2013", "docnet2014", "docnet2015", "docnet2016"]
+subj_list=[ "docnet2017", "docnet2018"]
 
  #runs to pull ROIs from
 rois = ["LO_toolloc", 'PPC_spaceloc', 'APC_spaceloc',  'APC_distloc', 'PPC_toolloc', 'APC_toolloc']
@@ -30,7 +30,7 @@ rois = ["LO_toolloc", 'PPC_spaceloc', 'APC_spaceloc',  'APC_distloc', 'PPC_tooll
 
 exp = 'catmvpa' #experimental tasks
 
-
+file_suf = "_supp"
 exp_suf = [""]
 
 
@@ -271,7 +271,7 @@ def create_combined_rdm():
 
     
 
-    summary_df.to_csv(f'{summary_dir}/allrois_rdm.csv', index = False)
+    summary_df.to_csv(f'{summary_dir}/allrois_rdm{file_suf}.csv', index = False)
     
 
 
@@ -319,16 +319,19 @@ def calc_summary_mvpa():
             #pdb.set_trace()
 
 
-
+subj_list=[ "docnet2017", "docnet2018"]
 copy_rois()
-#extract_acts()
-#sort_by_functional()
 
-#calc_within_between()
+extract_acts()
+sort_by_functional()
+
+calc_within_between()
 #calc_summary_mvpa()
 
+subj_list=["docnet2001", "docnet2002","docnet2003","docnet2004", "docnet2005", "docnet2007",
+"docnet2008", "docnet2012","docnet2013", "docnet2014", "docnet2015", "docnet2016","docnet2017", "docnet2018"]
 
-#create_combined_rdm()
+create_combined_rdm()
 
 
 

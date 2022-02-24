@@ -14,9 +14,9 @@ run_time = "2-00:00:00"
 
 #subj info
 subj_list = [2001,2002,2003,2004, 2005, 2007, 2008, 2012, 2013, 2014, 2015, 2016]
-subj_list = list(range(1001, 1013))
+subj_list = [2017,2018]
 
-seed_rois = ['lPPC_spaceloc','lAPC_spaceloc']
+seed_rois = ['lPPC_spaceloc','lAPC_spaceloc','rPPC_spaceloc','rAPC_spaceloc']
 
 
 
@@ -57,8 +57,8 @@ def setup_sbatch(ss, rr):
 # Standard output and error log
 #SBATCH --output={study_dir}/slurm_out/{job_name}_{ss}_{rr}.out
 
-module load anaconda3
-conda activate brainiak
+
+conda activate brainiak_new
 
 """
     return sbatch_setup
@@ -81,7 +81,7 @@ for ss in subj_list:
         if os.path.exists(f'{roi_dir}/{rr}.nii.gz'):
             print(ss, rr)
             #os.remove(f"{job_name}.sh")
-            job_cmd = f'python {study_dir}/fmri/docnet_mvpd.py {ss} {rr}'
+            job_cmd = f'python {study_dir}/fmri/docnet/mvpda_searchlight.py {ss} {rr}'
             f = open(f"{job_name}.sh", "a")
             f.writelines(setup_sbatch(ss,rr))
             f.writelines(job_cmd)

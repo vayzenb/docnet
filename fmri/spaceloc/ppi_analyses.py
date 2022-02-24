@@ -22,16 +22,15 @@ warnings.filterwarnings('ignore')
 '''exp info'''
 subs = list(range(1001,1013))
 subs = subs + list(range(2013,2019))
-print(subs)
-#subs = list(range(1012,1005, -1))
-#subs = list(range(1001,1006))
-print(subs)
+
 study ='spaceloc'
 study_dir = f"/lab_data/behrmannlab/vlad/{study}"
 out_dir = f'{study_dir}/derivatives/fc'
 results_dir = '/user_data/vayzenbe/GitHub_Repos/docnet/results'
 exp = 'spaceloc'
 rois = ['PPC_spaceloc', 'APC_spaceloc', 'PPC_depthloc', 'APC_depthloc', 'PPC_toolloc', 'APC_toolloc', 'PPC_distloc', 'APC_distloc']
+dorsal_rois = ['lPPC', 'lAPC','rPPC', 'rAPC']
+dorsal_rois = ['rPPC', 'rAPC']
 control_tasks = ['distloc','toolloc','depthloc']
 file_suf = '_supp'
 
@@ -58,7 +57,7 @@ def extract_roi_coords():
     """
     Define ROIs
     """
-    parcels = ['PPC', 'APC',]
+    parcels = ['PPC', 'APC']
 
     for ss in subs:
         sub_dir = f'{study_dir}/sub-{study}{ss}/ses-01'
@@ -189,8 +188,8 @@ def conduct_ppi():
 
         roi_coords = pd.read_csv(f'{roi_dir}/spheres/sphere_coords.csv')
 
-        for tsk in ['spaceloc','distloc', 'toolloc']:
-            for rr in ['lPPC','lAPC']:
+        for tsk in ['spaceloc','distloc']:
+            for rr in dorsal_rois:
                 all_runs = [] #this will get filled with the data from each run
                 for rcn, rc in enumerate(run_combos): #determine which runs to use for creating ROIs
                     curr_coords = roi_coords[(roi_coords['index'] == rcn) & (roi_coords['task'] ==tsk) & (roi_coords['roi'] ==rr)]
@@ -239,10 +238,10 @@ def create_summary():
     """
     extract avg PPI in LO  and PFS
     """
-    ventral_rois = ['LO_toolloc', 'PFS_toolloc']
-    rois = ["PPC_spaceloc", "PPC_distloc", "PPC_toolloc"]
-    rois = ["APC_spaceloc", "APC_distloc", "APC_toolloc"]
-
+    ventral_rois = ['LO_toolloc']
+    #rois = ["PPC_spaceloc", "PPC_distloc", "PPC_toolloc"]
+    rois = ["PPC_spaceloc", "APC_spaceloc", "APC_distloc", "APC_toolloc"]
+    print(subs)
     #For each ventral ROI
     for lrv in ['l','r']:
         
@@ -252,34 +251,38 @@ def create_summary():
             #summary_df = pd.DataFrame(columns = ['sub'] + ['r' + rr for rr in rois])
             ventral = f'{lrv}{vr}'
             print(ventral)
+            
             for ss in subs:
+                
                 sub_dir = f'{study_dir}/sub-{study}{ss}/ses-01/'
                 roi_dir = f'{sub_dir}/derivatives/rois'
                 
-                if os.path.exists(f'{roi_dir}/{ventral}_peak.nii.gz'):
-                    ventral_mask = image.load_img(f'{roi_dir}/{ventral}.nii.gz')
-                    ventral_mask = input_data.NiftiMasker(ventral_mask)
-                    
-                    
-                    roi_mean = []
-                    roi_mean.append(ss)
-                    #For each dorsal ROI
-                    for lr in ['l','r']:
-                        for rr in rois:
-                            roi = f'{lr}{rr}'
-                            #if os.path.exists(f'{roi_dir}/{roi}_peak.nii.gz'):
+                #if os.path.exists(f'{roi_dir}/{ventral}_peak.nii.gz'):
+                ventral_mask = image.load_img(f'{roi_dir}/{ventral}.nii.gz')
+                ventral_mask = input_data.NiftiMasker(ventral_mask)
+                
+                
+                roi_mean = []
+                roi_mean.append(ss)
+                
+                #For each dorsal ROI
+                for lr in ['l','r']:
+                    for rr in rois:
+                        
+                        roi = f'{lr}{rr}'
+                        if os.path.exists(f'{out_dir}/sub-{study}{ss}_{roi}_fc.nii.gz'):
                             ppi_img = image.load_img(f'{out_dir}/sub-{study}{ss}_{roi}_fc.nii.gz')
                             #ppi_img  = image.smooth_img(ppi_img, 6)
                             acts = ventral_mask.fit_transform(ppi_img)
 
                             
                             roi_mean.append(acts.mean())
-                        #else:
-                        #    roi_mean.append(np.nan)
-                #pdb.set_trace()
+                        else:
+                            roi_mean.append(np.nan)
+            #pdb.set_trace()
                 summary_df = summary_df.append(pd.Series(roi_mean, index = summary_df.columns), ignore_index = True)
         #print(ventral)
-        summary_df.to_csv(f'{results_dir}/{ventral}_fc{file_suf}.csv', index=False)
+            summary_df.to_csv(f'{results_dir}/ppi/{ventral}_fc{file_suf}.csv', index=False)
         #summary_df.iloc[:, 1:].mean().plot.bar()
         #plt.pause(0.0001)
                 
@@ -289,7 +292,8 @@ def create_summary():
 
 #                    print(ss, roi)
 
-#subs = list(range(2013,2019))
+#subs = list(range(2018,2015,-1))
+#print(subs)
 #extract_roi_coords()
 #conduct_ppi()
 subs = list(range(1001,1013)) + list(range(2013,2019))

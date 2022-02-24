@@ -6,7 +6,7 @@ out_dir = '/user_data/vayzenbe/GitHub_Repos/docnet/results/mvgca';
 addpath('/user_data/vayzenbe/GitHub_Repos/MVGC1')
 startup;
 
-subj_list = [2001,2002,2003,2004, 2005, 2007, 2008, 2012, 2013, 2014, 2015, 2016];
+subj_list = [2001,2002,2003,2004, 2005, 2007, 2008, 2012, 2013, 2014, 2015, 2016, 2017, 2018];
 
 
 lr = {'l','r'};

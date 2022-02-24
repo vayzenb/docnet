@@ -11,5 +11,7 @@ Experiment 1 - analysis pipeline
 7. Run create_rois to create rois from contrasts + parcels
 8. Run 1stlevel2anat to register 1stlevel stat file to standard, to be used later for cross-val
 9. Run create_roi_sphere for create 6mm spherical ROIs centered on the peak
+10. Run extract_peakVox.py to determine the peak 100 voxels in region
+	- run twice for dorsal and ventral/toolloc region
 
 #Experimental analysis

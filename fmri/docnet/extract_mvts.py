@@ -171,6 +171,7 @@ def extract_ts(bold_vol, roi):
 
 # %%
 subj_list = [2001,2002,2003,2004, 2005, 2007, 2008, 2012, 2013, 2014, 2015, 2016]
+subj_list = [2017, 2018]
 rois =  ['PPC_spaceloc',   'APC_spaceloc',  'APC_distloc', 'LO_toolloc']
 for ss in subj_list:
     sub_dir = f'{study_dir}/sub-{study}{ss}/ses-02/'

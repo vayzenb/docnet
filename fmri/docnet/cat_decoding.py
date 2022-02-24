@@ -18,7 +18,8 @@ import pandas as pd
 
 
 subj_list=["docnet2001", "docnet2002","docnet2003","docnet2004", "docnet2005", "docnet2007",
-"docnet2008", "docnet2012","docnet2013", "docnet2014", "docnet2015", "docnet2016"]
+"docnet2008", "docnet2012","docnet2013", "docnet2014", "docnet2015", "docnet2016", 'docnet2017', 'docnet2018']
+#subj_list = ['docnet2017', 'docnet2018']
 
 #anatomical ROI
 d_roi = ['LOC','PPC_spaceloc', 'APC_spaceloc', 'PPC_depthloc', 'APC_depthloc', 'PPC_distloc',  'APC_distloc', 'PPC_toolloc', 'APC_toolloc']
@@ -37,9 +38,10 @@ exp_cats = ['boat', 'camera',' car', 'guitar','lamp']
 
 #create a list of labels for classification
 exp_labels = np.concatenate((np.ones((1,5)),np.ones((1,5))*2, np.ones((1,5))*3, np.ones((1,5))*4, np.ones((1,5))*5),axis =1)[0]
-pdb.set_trace()
+#pdb.set_trace()
 
 data_dir = 'derivatives/results/beta/catmvpa'
+file_suf = '_supp'
 
 n_vox = 100
 
@@ -65,6 +67,7 @@ def decode_single_roi():
               
                 for ecn, ec in enumerate(exp_cond):
                     #load in ventral data
+                    #print(f'{subj_dir}/{lr}{rr}_{ec}.txt')
                     if os.path.exists(f'{subj_dir}/{lr}{rr}_{ec}.txt'):
                         temp_data = np.loadtxt(f'{subj_dir}/{lr}{rr}_{ec}.txt')
                         if len(temp_data) >= n_vox:
@@ -107,7 +110,7 @@ def decode_single_roi():
                     #print(f'{roi_dir}/{lr}{rr}.nii.gz')
                   
         summary_df = summary_df.append(pd.Series([ss] + roi_decode, index = summary_df.columns), ignore_index= True)
-        summary_df.to_csv(f'results/decoding_summary_single_roi.csv', index = False)
+        summary_df.to_csv(f'results/decoding_summary_single_roi{file_suf}.csv', index = False)
                 
 
 
@@ -202,7 +205,7 @@ def decode_combined_roi():
         #pdb.set_trace()
         #append final data to summary
         summary_df = summary_df.append(pd.Series([ss] + roi_decode, index = summary_df.columns), ignore_index= True)
-        summary_df.to_csv(f'results/decoding_summary_combined_roi.csv', index = False)
+        summary_df.to_csv(f'results/decoding_summary_combined_roi{file_suf}.csv', index = False)
 
 
 
@@ -213,4 +216,4 @@ def decode_combined_roi():
 
 
 decode_single_roi()
-decode_combined_roi()
+#decode_combined_roi()
