@@ -7,12 +7,14 @@ addpath('/user_data/vayzenbe/GitHub_Repos/MVGC1')
 startup;
 
 subj_list = [2001,2002,2003,2004, 2005, 2007, 2008, 2012, 2013, 2014, 2015, 2016, 2017, 2018];
+subj_list = [2001,2002,2003,2004, 2005, 2007, 2008, 2012, 2013, 2014, 2015, 2016];
 
 
 lr = {'l','r'};
 dorsal_rois = {'PPC_spaceloc',   'APC_spaceloc',  'APC_distloc'};
 ventral_rois = {'LO_toolloc'};
 cols = {'sub'}; %
+file_suf = ''
 %%
 %start analysis loop
 sn = 1; %tracks which sub num we are on
@@ -82,4 +84,4 @@ end
 %%
 %convert final summary to table and save
 final_summary = cell2table(sub_summary, 'VariableNames', cols);
-writetable(final_summary, [out_dir,'/mvgca_summary.csv'], 'Delimiter', ',')
+writetable(final_summary, [out_dir,'/mvgca_summary', file_suf,'.csv'], 'Delimiter', ',')
