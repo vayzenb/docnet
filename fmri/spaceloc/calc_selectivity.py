@@ -190,99 +190,6 @@ def calc_selectivity():
 
                         plot_vsf(sub_dir,df_roll,roi,cond_name, 'Beta',True, f'{roi}_activation')
 
-def calc_mvpa():
-    '''
-    Analyze MVPA data
-    '''
-    
-
-    for ss in subj_list:
-        print(ss, 'MVPA')
-        sub_dir = f'{study_dir}/sub-{ss}/ses-01/derivatives'
-        raw_dir = f'{sub_dir}/results/beta'
-        results_dir = f'{sub_dir}/results/beta_summary'
-        os.makedirs(results_dir, exist_ok = True)
-        os.makedirs(f'{sub_dir}/results/figures', exist_ok = True)
-    
-        for rr in rois:
-            for lr in ['l','r']: #set left and right
-
-                roi = f'{lr}{rr}' #set roi
-                if os.path.exists(f'{sub_dir}/rois/{roi}.nii.gz'):
-                    loc_file = f'{sub_dir}/rois/data/{roi}.txt'
-
-                    loc_df = pd.read_csv(loc_file, sep="  ", header=None, names = ["x", "y", "z", "loc"])
-                    if loc_df.shape[0] >= peak_vox:
-                        n = 0
-                        for ecn, exp_cond in enumerate(exp): #loop through each experiment within each ROI localizer
-                            '''
-                            Analyze correlation for each condition
-                            '''
-                            for cc in cond[ecn]: #loop through each condition of that localizer
-                                curr_df1 = fmri_funcs.organize_data(sub_dir,raw_dir, roi, f'{cc}_{first_runs[ecn][0]}', 'dist')
-                                curr_df1.columns = ['x', 'y','z', 'loc','dist', f'{cc}_1']
-                                curr_df2 = fmri_funcs.organize_data(sub_dir,raw_dir, roi, f'{cc}_{first_runs[ecn][1]}', 'dist')
-                                curr_df2.columns = ['x', 'y','z', 'loc','dist', f'{cc}_2']
-                                #curr_df1.rename(columns= {5: f'{cc}_1'})
-                                #curr_df2.rename(columns= {5 : f'{cc}_2'})
-                                #pdb.set_trace()
-                                
-                                if n == 0:
-                                    df = curr_df1
-                                    df[f'{cc}_2'] = curr_df2[f'{cc}_2']
-                                else:
-                                    df[f'{cc}_1'] = curr_df1[f'{cc}_1']
-                                    df[f'{cc}_2'] = curr_df2[f'{cc}_2']
-                                
-                                n = n+1
-                        n = 1
-                        df = df.iloc[:,5:]
-                        #demean by subtracting across all conditions
-                        df = df.sub(df.mean(axis=1), axis=0)
-                        
-
-                        df_roll = pd.DataFrame()
-                        between_temp = pd.DataFrame() 
-                        for c1 in cond_names:
-                            for c2 in cond_names:
-                                temp_x = df[f'{c1}_1']
-                                temp_y = df[f'{c1}_2']
-
-                                #Do rolling correlations
-                                temp = temp_x.rolling(bin_size).corr(temp_y)
-                                temp = temp.dropna()
-                                temp= temp.reset_index(drop=True)
-
-                                if c1 == c2:
-                                    temp = pd.DataFrame(temp)
-                                    temp.columns= [f'{c1}']
-                                    if df_roll.empty:
-                                        df_roll = temp
-                                    else:
-                                        df_roll = df_roll.join(temp)
-                                else:
-                                    if between_temp.empty:
-                                        between_temp =temp
-                                    else:
-                                        between_temp =between_temp + temp
-                                        n = n + 1
-
-                        between = pd.DataFrame(between_temp/n)
-                        between.columns = ['between']
-                        df_roll = df_roll.join(between)
-
-    
-                        plot_vsf(sub_dir,df_roll,roi,cond_names + ['between'], 'Correlations',True,f'{roi}_correlations')
-                            
-                        df_roll.to_csv(f'{results_dir}/{ss}_{roi}_correlations.csv', index = False)
-                        
-                        
-                        df_sum = df_roll.head(peak_vox)
-                        df_sum = df_sum.mean()
-                        #pdb.set_trace()
-
-                        
-                        plot_bar(sub_dir, df_sum, roi,cond_names + ['between'], 'Correlations', True,f'{roi}_correlations')
 
                     
 
@@ -343,14 +250,14 @@ def group_summaries(data_type):
 subj_list = ["spaceloc2013", "spaceloc2014", "spaceloc2015" , "spaceloc2016" , "spaceloc2017" , "spaceloc2018"]
 extract_acts()
 calc_selectivity()
-#calc_mvpa()
+
 
 
 subj_list=["spaceloc1001", "spaceloc1002", "spaceloc1003", "spaceloc1004", "spaceloc1005", "spaceloc1006", "spaceloc1007",
 "spaceloc1008" ,"spaceloc1009", "spaceloc1010", "spaceloc1011" ,"spaceloc1012", 
 "spaceloc2013", "spaceloc2014", "spaceloc2015" , "spaceloc2016" , "spaceloc2017" , "spaceloc2018"]
 group_summaries('activations')
-#group_summaries('correlations')
+
 
 
 

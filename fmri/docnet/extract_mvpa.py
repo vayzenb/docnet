@@ -117,7 +117,7 @@ def sort_by_functional():
                         df.to_csv(f'{raw_dir}/{roi}_voxel_acts{es}.csv', index = False)
 
 
-def calc_within_between():
+def create_individual_rdm():
     '''
     load voxel acts from each highlevel and correlate in pairs
     to make symmetric/asymmetric RDMs
@@ -275,48 +275,7 @@ def create_combined_rdm():
     
 
 
-def calc_summary_mvpa():
-    '''
-    Combine within/between results
-    '''        
-    print('calculating within/between summary across subs...')
-    #note: each sub might have different rois
 
-    summary_df =pd.DataFrame(columns = ['roi', 'identity', 'category','between', 'identity_se', 'category_se','between_se'])
-    
-    summary_dir = f'{study_dir}/derivatives/results/{exp}'
-    os.makedirs(summary_dir, exist_ok = True)
-    os.makedirs(f'{summary_dir}/figures', exist_ok = True)
-    #suf = '_split'
-    for lr in ['l','r']: #set left and right    
-        for rr in rois:
-            roi_vals = []
-            #all_subs = []
-            for ss in subj_list:
-                sub_dir = f'{study_dir}/sub-{ss}/ses-02/derivatives'
-                results_dir = f'{sub_dir}/results/beta_summary/{exp}'
-                roi_nifti = f'{sub_dir}/rois/{lr}{rr}.nii.gz'
-
-                if os.path.exists(roi_nifti):
-                    #load df
-                    
-                    df = pd.read_csv(f'{results_dir}/mvpa_summary{suf}.csv')
-                    #extract and append data from current roi
-                    curr_roi = df.loc[df['roi'] == f'{lr}{rr}',:].values.flatten().tolist()
-                    roi_vals.append(curr_roi[1:])
-                    
-                    #
-
-                    #roi_vals.append(df.loc[df['roi'] == f'{lr}{rr}',:].values.flatten().tolist())
-            roi_vals = np.array(roi_vals)
-
-            
-            roi_means = pd.Series([f'{lr}{rr}'] + np.mean(roi_vals, axis = 0).tolist() + stats.sem(roi_vals, axis = 0).tolist(),index = summary_df.columns)
-            summary_df = summary_df.append(roi_means,ignore_index=True)
-    summary_df.to_csv(f'{summary_dir}/mvpa_summary{suf}.csv', index = False)
-    #pdb.set_trace()
-    #plt.bar(summary_df['roi'], df_mean,  yerr=df_se)
-            #pdb.set_trace()
 
 
 subj_list=[ "docnet2017", "docnet2018"]
@@ -325,8 +284,8 @@ copy_rois()
 extract_acts()
 sort_by_functional()
 
-calc_within_between()
-#calc_summary_mvpa()
+create_individual_rdm()
+
 
 subj_list=["docnet2001", "docnet2002","docnet2003","docnet2004", "docnet2005", "docnet2007",
 "docnet2008", "docnet2012","docnet2013", "docnet2014", "docnet2015", "docnet2016","docnet2017", "docnet2018"]

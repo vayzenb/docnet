@@ -25,7 +25,7 @@ results_dir = '/user_data/vayzenbe/GitHub_Repos/docnet/results'
 exp = 'spaceloc'
 rois = ['PPC_spaceloc', 'APC_spaceloc', 'PPC_depthloc', 'APC_depthloc', 'PPC_toolloc', 'APC_toolloc', 'PPC_distloc', 'APC_distloc']
 control_tasks = ['distloc','toolloc','depthloc']
-file_suf  = '_supp'
+file_suf  = ''
 '''scan params'''
 tr = 1
 vols = 321
