@@ -135,6 +135,8 @@ def extract_acts():
                                 
                                 
                                 out = subprocess.run(bash_cmd.split(),check=True, capture_output=True, text=True)
+                else:
+                    print(ss, roi)
                                 
 def calc_selectivity():
     '''
